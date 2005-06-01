@@ -1,4 +1,4 @@
-.Dd Nov, 22 2003
+.Dd Jan, 18 2005
 .Os 
 .Dt "gtk-send-pr" 1 CON
 .Sh NAME
@@ -7,7 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Ar \-a file
-.Op Fl vh
+.Op Fl mvh
 .Sh DESCRIPTION
 gtk-send-pr is a problem reporting tool 
 .Po based on GTK+
@@ -18,6 +18,9 @@ The following options can be used:
 .Pp
 .Ar \-a file
 Include file in the Fix: section
+.br
+.Fl m
+Enable maintainer mode
 .br
 .Fl v
 Show version and exit
@@ -82,6 +85,27 @@ Once you have finished filling the relevant fields, press
 .Do
 Send
 .Dc to send the problem report.
+.Sh Maintainer Mode
+As of version 0.4.2, you can enable 
+.Do
+maintainer mode
+.Dc with the 
+.Do
+-m
+.Dc command line option. Maintainer mode presets some options to make ports (packages in NetBSD) 
+maintainers life easier. The 
+.Do
+category
+.Dc will be set to ports (pkg in NetBSD) and the 
+.Do
+class
+.Dc will be set to maintainer-update (change-request in NetBSD). The 
+.Do
+Synopsis
+.Dc field will read 
+.Do
+[Maintainer Update]
+.Dc .
 .Sh SEE ALSO
 .Xr send-pr 1
 .Sh HISTORY

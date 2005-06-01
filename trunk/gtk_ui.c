@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -65,12 +65,12 @@ static void help_pressed(GtkWidget *, gpointer);
 static void send_pressed(GtkWidget *, gpointer);
 static void open_pressed(GtkWidget *, gpointer);
 static void clear_fix_pressed(GtkWidget *, gpointer);
-
 static void auth_ok_pressed(GtkWidget *, gpointer);
 static void fill_pr(PROBLEM_REPORT *);
 static void update_profile(void);
 static void fix_view_drag_data_received(GtkWidget *, GdkDragContext *, 
-					gint, gint, GtkSelectionData *, guint, guint);
+					gint, gint, GtkSelectionData *, 
+					guint, guint);
 
 static int dirty;
 static GtkWidget *window;
@@ -122,7 +122,7 @@ int gsp_auth_done;
 static GSP_AUTH *auth_info;
 
 int
-create_gtk_ui(char *included_file)
+create_gtk_ui(char *included_file, int maint_mode)
 {
 
   GtkWidget *about_icon;
@@ -213,6 +213,7 @@ create_gtk_ui(char *included_file)
   char *fix_buffer = NULL; /* Buffer for the -a option */
   GtkWidget *file_dialog;
   char file_warning[1024];
+  int load_failed = FALSE;
 
   /* Drag and drop support */
   enum
@@ -415,6 +416,13 @@ create_gtk_ui(char *included_file)
   type_entry1 = gtk_entry_new();
   gtk_entry_set_max_length(GTK_ENTRY(type_entry1), 255);
 
+  /* Maintainer mode */
+  if(maint_mode == MAINT_YES) {
+
+    gtk_entry_set_text(GTK_ENTRY(type_entry1), "[Maintainer Update] ");
+
+  }
+
   /* Severity */
   type_frame2 = gtk_frame_new(" Severity ");
   type_vbox1 = gtk_vbox_new(TRUE, 2);
@@ -467,7 +475,25 @@ create_gtk_ui(char *included_file)
 
   }
 
-  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), 0);
+  if(maint_mode == MAINT_YES) {
+
+      for(i=0;i<(sizeof(pr_categories)/sizeof(char *));i++) {
+
+	if(strncmp(pr_categories[i], maint_cat, 255) == 0 ) {
+
+	  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), i);
+	  break;
+
+	}
+
+      }
+
+  } else {
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), 0);
+
+  }
+
   gtk_box_pack_start(GTK_BOX(type_vbox3), type_combo3, FALSE, FALSE, 0);
 
   gtk_container_add(GTK_CONTAINER(type_frame4), type_vbox3);
@@ -478,14 +504,32 @@ create_gtk_ui(char *included_file)
   type_vbox4 = gtk_vbox_new(TRUE, 2);
   type_combo4 = gtk_combo_box_entry_new_text();
 
-  for(i=0;i<(sizeof(pr_classes)/sizeof(char *));i++) {
+  for(i=0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo4),
 			      pr_classes[i]);
 
   }
 
-  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo4), 0);
+  if(maint_mode == MAINT_YES) {
+
+    for(i=0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
+
+	if(strncmp(pr_classes[i], maint_class, 255) == 0 ) {
+
+	  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo4), i);
+	  break;
+
+	}
+
+    }
+
+  } else {
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo4), 0);
+
+  }
+
   gtk_box_pack_start(GTK_BOX(type_vbox4), type_combo4, FALSE, FALSE, 0);
 
   gtk_container_add(GTK_CONTAINER(type_frame5), type_vbox4);
@@ -584,17 +628,11 @@ create_gtk_ui(char *included_file)
 
       gtk_text_buffer_set_text(fix_buffer1, fix_buffer, -1);
       free(fix_buffer);
+      load_failed = FALSE;
 
     } else {
 
-      snprintf(file_warning,1024, "Unable to read: %s", included_file);
-      file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
-					   GTK_DIALOG_DESTROY_WITH_PARENT,
-					   GTK_MESSAGE_ERROR,
-					   GTK_BUTTONS_OK,
-					   file_warning);
-      gtk_dialog_run(GTK_DIALOG(file_dialog));
-      gtk_widget_destroy(file_dialog);
+      load_failed = TRUE;
 
     }
 
@@ -650,6 +688,20 @@ create_gtk_ui(char *included_file)
   gtk_container_add(GTK_CONTAINER(window), vbox1);
 
   gtk_widget_show_all(window);
+
+  /* Show warning message if we couldn't load the file */
+  if(load_failed == TRUE) {
+
+    snprintf(file_warning,1024, "Unable to read: %s", included_file);
+    file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+					 GTK_DIALOG_DESTROY_WITH_PARENT,
+					 GTK_MESSAGE_ERROR,
+					 GTK_BUTTONS_CLOSE,
+					 file_warning);
+    gtk_dialog_run(GTK_DIALOG(file_dialog));
+    gtk_widget_destroy(file_dialog);
+
+  }
 
   /* Let the show begin */
   gtk_main();
@@ -752,7 +804,7 @@ about_pressed( GtkWidget *widget, gpointer data)
 				  "gtk-send-pr "
 				  GSP_VERSION " "
 				  GSP_CODENAME
-				  "\nCopyright (c) 2003-2004, "
+				  "\nCopyright (c) 2003-2005, "
 				  "Miguel Mendez\nE-Mail: <flynn@energyhq.es.eu.org>\n"
 				  "http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
   gtk_dialog_run(GTK_DIALOG(dialog));

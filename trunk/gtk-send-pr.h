@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@
 
 */
 
-#define GSP_VERSION "0.4.1"
-#define GSP_CODENAME "\"Dream On\""
+#define GSP_VERSION "0.4.2"
+#define GSP_CODENAME "\"When Sorrow Sang\""
 
 typedef struct user_prfile {
 
@@ -75,3 +75,7 @@ typedef struct gsp_auth {
   char *password;
 
 } GSP_AUTH;
+
+#define MAINT_NO 0
+#define MAINT_YES 1
+

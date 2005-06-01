@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
+Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -32,7 +32,7 @@ $Id$
 char *pr_categories[]= { "advocacy", "alpha", "amd64", "bin", "conf",
 			 "docs", "gnu", "i386", "ia64", "java", "kern",
 			 "misc", "ports", "powerpc", "sparc64", "standards",
-			 "threads", "www"
+			 "threads", "usb", "www"
 };
 
 char *pr_severities[]= { "non-critical", "serious", "critical" };
@@ -41,6 +41,9 @@ char *pr_classes[]= { "sw-bug", "doc-bug", "change-request", "update", "maintain
 char default_to[]="FreeBSD-gnats-submit@freebsd.org";
 char default_rcpt[]="FreeBSD gnats submit";
 char default_sub_id[]="current-users";
+
+#define maint_class "maintainer-update"
+#define maint_cat "ports"
 
 #else
 
@@ -71,5 +74,8 @@ char *pr_classes[]= { "sw-bug", "doc-bug", "change-request", "support" };
 char default_to[]="gnats-bugs@gnats.netbsd.org";
 char default_rcpt[]="gnats bugs";
 char default_sub_id[]="net";
+
+#define maint_class "change-request"
+#define maint_cat "pkg"
 
 #endif

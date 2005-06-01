@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -36,40 +37,59 @@
 #include "gtk_ui.h"
 
 static void usage(void);
+static void about(void);
 
 int
 main(int argc, char **argv)
 {
   int ch;
-  char *included_file=NULL;
+  char included_file[FILENAME_MAX];
+  int maintainer = MAINT_NO;
+  int use_file = 0;
 
-  while((ch = getopt(argc, argv, "avh")) != -1) {
+  memset(included_file, 0, sizeof(included_file));
+
+  while ((ch = getopt(argc, argv, "a:mvh")) != -1) {
 
     switch(ch) {
+
     case 'a':
-      if(argc>2) {
-	included_file=argv[optind];
-      } else {
-	usage();
-      }
+      strncpy(included_file, optarg, sizeof(included_file) - 1);
+      use_file = 1;
       break;
+
     case 'v':
-      printf("gtk-send-pr " GSP_VERSION " " GSP_CODENAME "\n"
-	     "Copyright (c) 2003-2004, Miguel Mendez."
-	     " All rights reserved.\n");
-      exit(EXIT_SUCCESS);
+      about();
+      break;
+
+    case 'm':
+      maintainer = MAINT_YES;
+      break;
+
+    case '?':
     case 'h':
     default:
       usage();
+
     }
-    argc -= optind;
-    argv += optind;
 
   }
-	
-  gtk_init (&argc, &argv);
 
-  create_gtk_ui(included_file);
+  argc -= optind;
+  argv += optind;
+
+  gtk_init(&argc, &argv);
+
+  if(use_file == 1) {
+
+    create_gtk_ui(included_file, maintainer);
+
+  } else {
+
+    create_gtk_ui(NULL, maintainer);
+
+  }
+
   return(0);
 
 }
@@ -77,9 +97,19 @@ main(int argc, char **argv)
 static void
 usage(void)
 {
-  printf("usage: gtk-send-pr [-a file] [-v] [-h]\n");
+  printf("usage: gtk-send-pr [-a file] [-m] [-v] [-h]\n");
   printf("\t-a file\tinclude file in the Fix: section\n");
+  printf("\t-m\tenable maintainer mode (see man page)\n");
   printf("\t-v\tshow version and exit\n");
   printf("\t-h\tshow this screen\n");
+  exit(EXIT_SUCCESS);
+}
+
+static void
+about(void)
+{
+  printf("gtk-send-pr " GSP_VERSION " " GSP_CODENAME "\n"
+	 "Copyright (c) 2003-2005, Miguel Mendez."
+	 " All rights reserved.\n");
   exit(EXIT_SUCCESS);
 }
