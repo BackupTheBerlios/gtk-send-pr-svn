@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -24,6 +24,7 @@
   $Id$
 
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/utsname.h>
@@ -64,9 +65,12 @@ uname_gather(char *uname_srm,char *uname_snrvm)
   struct utsname my_uname;
 
   i = uname(&my_uname);
-  if(i ==- 1) {
+
+  if (i ==- 1) {
+
     perror("uname()");
     exit(EXIT_FAILURE);
+
   }
 
   snprintf(uname_srm, 255, "%s %s %s", my_uname.sysname,
@@ -105,4 +109,3 @@ uname_gather(char *uname_srm,char *uname_snrvm)
   return 0;
 
 }
-

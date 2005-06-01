@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -212,7 +212,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   GdkPixbuf *icon16_pixbuf;
   GdkPixbuf *icon32_pixbuf;
   GdkPixbuf *icon48_pixbuf;
-  //  GdkPixbuf *icon64_pixbuf;
+
   GList *icon_list = NULL;
 
   char uname_srm[256];
@@ -405,7 +405,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_NO);
   gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_EN);
   gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_RE);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(email_ssl_option), 0);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(email_ssl_option), my_profile.ssl_mode);
   
   email_hbox1 = gtk_hbox_new(FALSE, 4);
   gtk_box_pack_start(GTK_BOX(email_hbox1), email_entry8, TRUE, TRUE, 4);
@@ -439,7 +439,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_entry_set_max_length(GTK_ENTRY(type_entry1), 255);
 
   /* Maintainer mode */
-  if(maint_mode == MAINT_YES) {
+  if (maint_mode == MAINT_YES) {
 
     gtk_entry_set_text(GTK_ENTRY(type_entry1), "[Maintainer Update] ");
 
@@ -450,7 +450,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox1 = gtk_vbox_new(TRUE, 2);
   type_combo1 = gtk_combo_box_entry_new_text();
 
-  for(i=0; i<(sizeof(pr_severities)/sizeof(char *)); i++) {
+  for (i = 0; i < (sizeof(pr_severities)/sizeof(char *)); i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo1),
 			      pr_severities[i]);
@@ -472,7 +472,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox2 = gtk_vbox_new(TRUE, 2);
   type_combo2 = gtk_combo_box_entry_new_text();
 
-  for(i=0; i<(sizeof(pr_priorities)/sizeof(char *)); i++) {
+  for (i = 0; i < (sizeof(pr_priorities)/sizeof(char *)); i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo2),
 			      pr_priorities[i]);
@@ -490,18 +490,18 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox3 = gtk_vbox_new(TRUE, 2);
   type_combo3 = gtk_combo_box_entry_new_text();
 
-  for(i=0;i<(sizeof(pr_categories)/sizeof(char *));i++) {
+  for (i = 0; i < (sizeof(pr_categories)/sizeof(char *));i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo3),
 			      pr_categories[i]);
 
   }
 
-  if(maint_mode == MAINT_YES) {
+  if (maint_mode == MAINT_YES) {
 
-      for(i=0;i<(sizeof(pr_categories)/sizeof(char *));i++) {
+      for (i = 0; i < (sizeof(pr_categories)/sizeof(char *));i++) {
 
-	if(strncmp(pr_categories[i], MAINT_CAT, 255) == 0 ) {
+	if (strncmp(pr_categories[i], MAINT_CAT, 255) == 0 ) {
 
 	  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), i);
 	  break;
@@ -526,16 +526,16 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox4 = gtk_vbox_new(TRUE, 2);
   type_combo4 = gtk_combo_box_entry_new_text();
 
-  for(i=0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
+  for ( i = 0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo4),
 			      pr_classes[i]);
 
   }
 
-  if(maint_mode == MAINT_YES) {
+  if (maint_mode == MAINT_YES) {
 
-    for(i=0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
+    for ( i = 0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
 
 	if(strncmp(pr_classes[i], MAINT_CLASS, 255) == 0 ) {
 
@@ -642,11 +642,11 @@ create_gtk_ui(char *included_file, int maint_mode)
 
   fix_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
 
-  if(included_file != NULL) {
+  if (included_file != NULL) {
 
     fix_buffer = load_file(included_file);
 
-    if(fix_buffer != NULL) {
+    if (fix_buffer != NULL) {
 
       gtk_text_buffer_set_text(fix_buffer1, fix_buffer, -1);
       free(fix_buffer);
@@ -712,7 +712,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_widget_show_all(window);
 
   /* Show warning message if we couldn't load the file */
-  if(load_failed == TRUE) {
+  if (load_failed == TRUE) {
 
     snprintf(file_warning,1024, "Unable to read: %s", included_file);
     file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
@@ -735,13 +735,13 @@ create_gtk_ui(char *included_file, int maint_mode)
 /* CALLBACKS */
 
 static gint
-delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
+delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
 
   GtkWidget *dialog;
   gint result;
 
-  if(dirty > 0) {
+  if (dirty > 0) {
 
     dialog = gtk_message_dialog_new(GTK_WINDOW(window),
 				    GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -757,7 +757,7 @@ delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
 
   }
 
-  if(result == GTK_RESPONSE_YES) {
+  if (result == GTK_RESPONSE_YES) {
 
     update_profile();
     save_settings(&my_profile);
@@ -785,7 +785,7 @@ quit_pressed( GtkWidget *widget, gpointer data)
   GtkWidget *dialog;
   gint result;
 
-  if(dirty > 0) {
+  if (dirty > 0) {
 
     dialog = gtk_message_dialog_new(GTK_WINDOW(window),
 				    GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -795,7 +795,7 @@ quit_pressed( GtkWidget *widget, gpointer data)
     result = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);    
 
-    if(result == GTK_RESPONSE_YES) {
+    if (result == GTK_RESPONSE_YES) {
 
       update_profile();
       save_settings(&my_profile);
@@ -832,7 +832,7 @@ about_pressed( GtkWidget *widget, gpointer data)
     "A user friendly GNATS client";
 
   const gchar *license =
-    "Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.\n"
+    "Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>\n"
     "\n"
     "Redistribution and use in source and binary forms, with or without\n"
     "modification, are permitted provided that the following conditions are met:\n"
@@ -857,7 +857,7 @@ about_pressed( GtkWidget *widget, gpointer data)
   gtk_show_about_dialog(GTK_WINDOW(window),
 			"authors", authors,
 			"artists", artists,
-			"copyright", "(C) 2003-2005 Miguel Mendez",
+			"copyright", "(C) 2003, 2004, 2005 Miguel Mendez",
 			"comments", comments,
 			"license", license,
 			"logo", icon64_pixbuf,
@@ -913,9 +913,9 @@ send_pressed( GtkWidget *widget, gpointer data)
 
 
   fill_pr(&mypr);
-  retcode=send_pr(&mypr);
+  retcode = send_pr(&mypr);
 
-  if(retcode == 0) {
+  if (retcode == 0) {
 
     dirty=0;
     gtk_widget_set_sensitive(send_button, FALSE);
@@ -956,7 +956,7 @@ open_pressed( GtkWidget *widget, gpointer data)
 					    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
 					    NULL);
 
-  if(gtk_dialog_run(GTK_DIALOG(file_dialog)) == GTK_RESPONSE_ACCEPT) {
+  if (gtk_dialog_run(GTK_DIALOG(file_dialog)) == GTK_RESPONSE_ACCEPT) {
 
     selected_filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_dialog));
 
@@ -964,7 +964,7 @@ open_pressed( GtkWidget *widget, gpointer data)
 
     g_free(selected_filename);
 
-    if(fix_buffer != NULL) {
+    if (fix_buffer != NULL) {
 
       gtk_text_buffer_insert_at_cursor(fix_buffer1, fix_buffer, -1);
       free(fix_buffer);
@@ -989,7 +989,7 @@ open_pressed( GtkWidget *widget, gpointer data)
 }
 
 static void
-clear_fix_pressed( GtkWidget *widget, gpointer data)
+clear_fix_pressed(GtkWidget *widget, gpointer data)
 {
 
   gtk_text_buffer_set_text(fix_buffer1, "", 0);
@@ -1020,19 +1020,19 @@ fill_pr(PROBLEM_REPORT *mypr)
   mypr->smtp_cc_text = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
   cc_field=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
 
-  if(strlen(mypr->smtp_cc_text)>0) {
+  if (strlen(mypr->smtp_cc_text)>0) {
 
     do {
 
       temp_cc = strsep(&cc_field, ",");
 
-      if(temp_cc != NULL) {
+      if (temp_cc != NULL) {
 	
 	mypr->smtp_cc[mypr->smtp_cc_num] = temp_cc;
 	mypr->smtp_cc_num++;
       }
 
-    } while(temp_cc != NULL);
+    } while (temp_cc != NULL);
 
   }
 
@@ -1089,14 +1089,14 @@ fill_pr(PROBLEM_REPORT *mypr)
   memset(env_buffer,0,2*i+16);
   ctmp = env_buffer;
 
-  for(j=0; j<i; j++) {
+  for (j = 0; j < i; j++) {
 
     c = (char )*from++;
-    if(c != '\n') {
+    if (c != '\n') {
 
       *ctmp++ = c;
 
-    } else if(c > 126 || (c < 31 && c != '\n')) {
+    } else if (c > 126 || (c < 31 && c != '\n')) {
 
       break;
 
@@ -1120,17 +1120,17 @@ fill_pr(PROBLEM_REPORT *mypr)
   memset(desc_buffer,0,2*i+16);
   ctmp = desc_buffer;
 
-  for(j=0; j<i; j++) {
+  for (j = 0; j < i; j++) {
 
     c = (char )*from++;
 
-    if(c != '\n') {
+    if (c != '\n') {
 
       *ctmp++ = c;
 
-    } else if(c > 126 || (c < 31 && c != '\n')) {
+    } else if (c > 126 || (c < 31 && c != '\n')) {
 
-      break;			
+      break;
 
     } else {
 
@@ -1152,15 +1152,15 @@ fill_pr(PROBLEM_REPORT *mypr)
   memset(how_buffer,0,2*i+16);
   ctmp = how_buffer;
 
-  for(j=0; j<i; j++) {
+  for ( j = 0; j < i; j++) {
 
     c = (char )*from++;
 
-    if(c != '\n') {
+    if (c != '\n') {
 
       *ctmp++ = c;
 
-    } else if(c > 126 || (c < 31 && c != '\n')) {
+    } else if (c > 126 || (c < 31 && c != '\n')) {
 
       break;
 
@@ -1180,20 +1180,20 @@ fill_pr(PROBLEM_REPORT *mypr)
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
   from = gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
-        	 
+
   fix_buffer = malloc(2*i+16); /* Let's be convervative here */
   memset(fix_buffer,0,2*i+16);
   ctmp = fix_buffer;
 
-  for(j=0; j<i; j++) {
+  for(j = 0; j < i; j++) {
 
     c = (char )*from++;
 
-    if(c != '\n') {
+    if (c != '\n') {
 
       *ctmp++ = c;
 
-    } else if(c > 126 || (c < 31 && c != '\n')) {
+    } else if (c > 126 || (c < 31 && c != '\n')) {
 
       break;
 
@@ -1216,7 +1216,6 @@ update_profile(void)
   int newsize[2];
   char *tmp_entry;
 
-
   gtk_window_get_size(GTK_WINDOW(window), &newsize[0], &newsize[1]);
 
   my_profile.geom_x = newsize[0];
@@ -1224,18 +1223,46 @@ update_profile(void)
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
   strncpy(my_profile.email, tmp_entry, sizeof(my_profile.email));
+  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry6));
   strncpy(my_profile.name, tmp_entry, sizeof(my_profile.name));	
+  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry7));
   strncpy(my_profile.org, tmp_entry, sizeof(my_profile.org));	
+  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
   strncpy(my_profile.smtp, tmp_entry, sizeof(my_profile.smtp));
+  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_port_entry));
   strncpy(my_profile.smtp_port, tmp_entry, sizeof(my_profile.smtp_port));
+  g_free(tmp_entry);
+
+  tmp_entry = gtk_combo_box_get_active_text(GTK_COMBO_BOX(email_ssl_option));
+
+  if (strcmp(tmp_entry, SSL_NO) == 0) {
+
+    my_profile.ssl_mode = GSP_SSL_NO;
+
+  } else if (strcmp(tmp_entry, SSL_EN) == 0) {
+
+    my_profile.ssl_mode = GSP_SSL_EN;
+
+  } else if (strcmp(tmp_entry, SSL_RE) == 0) {
+
+    my_profile.ssl_mode = GSP_SSL_RE;
+
+  } else {
+
+    fprintf(stderr, "Warning, SSL mode was in undefined state.\n");
+    my_profile.ssl_mode = GSP_SSL_NO;
+
+  }
+
+  g_free(tmp_entry);
 
 }
 
@@ -1264,9 +1291,9 @@ fix_view_drag_data_received(GtkWidget          *widget,
       printf("Received \"%s\" in fix_view\n", data->data);
 #endif
 
-      file_temp = data->data;
+      file_temp = (char *) data->data;
 
-      if(strncmp(drag_dupe, file_temp, 1024) == 0) {
+      if (strncmp(drag_dupe, file_temp, 1024) == 0) {
 
 #ifdef DEBUG_DND
 	printf("Got duplicated drop [%s]\n", drag_dupe);
@@ -1281,19 +1308,19 @@ fix_view_drag_data_received(GtkWidget          *widget,
 
       }
 
-      if(strncmp(file_temp, "file:", strlen("file:")) == 0 ) {
+      if (strncmp(file_temp, "file:", strlen("file:")) == 0 ) {
 
 	strncpy(file_buffer, file_temp + strlen("file:"), 1024);
 
-	for(i=0; i<1024; i++) {
+	for (i = 0; i < 1024; i++) {
 
-	  if(file_buffer[i] == '\n'|| file_buffer[i] == '\r') file_buffer[i] = '\0';
+	  if (file_buffer[i] == '\n'|| file_buffer[i] == '\r') file_buffer[i] = '\0';
 
 	}
 
 	fix_buffer = load_file(file_buffer);
 
-	if(fix_buffer != NULL) {
+	if (fix_buffer != NULL) {
 
 	  gtk_text_buffer_insert_at_cursor(fix_buffer1, fix_buffer, -1);
 	  free(fix_buffer);
@@ -1312,14 +1339,14 @@ fix_view_drag_data_received(GtkWidget          *widget,
 
 	}
 
-      } 
+      }
 
 
       gtk_drag_finish(context, TRUE, FALSE, time);
       return;
 
     }
-  
+
   gtk_drag_finish(context, FALSE, FALSE, time);
 
 }
@@ -1357,7 +1384,7 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
   gtk_entry_set_visibility(GTK_ENTRY(auth_passentry), FALSE);
   gtk_container_add(GTK_CONTAINER(auth_passframe), auth_passentry);
 
-  auth_ok=gtk_button_new_from_stock(GTK_STOCK_OK);
+  auth_ok = gtk_button_new_from_stock(GTK_STOCK_OK);
 
   g_signal_connect(GTK_OBJECT(auth_ok), "clicked",
 		   G_CALLBACK(auth_ok_pressed), NULL);
@@ -1371,13 +1398,6 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
   gtk_container_add(GTK_CONTAINER(auth_window), auth_vbox);
 
   gtk_widget_show_all(auth_window);
-/*   gtk_widget_show(auth_vbox); */
-/*   gtk_widget_show(auth_label); */
-/*   gtk_widget_show(auth_userframe); */
-/*   gtk_widget_show(auth_userentry); */
-/*   gtk_widget_show(auth_passframe); */
-/*   gtk_widget_show(auth_passentry); */
-/*   gtk_widget_show(auth_ok); */
 
   while(gsp_auth_done != TRUE) {
 
@@ -1396,27 +1416,11 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   /* Keep a copy before destroying the widgets */
   strncpy(auth_info->username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)), 1023);
   strncpy(auth_info->password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)), 1023);
-  
-/*   gtk_widget_hide(auth_window); */
-/*   gtk_widget_hide(auth_vbox); */
-/*   gtk_widget_hide(auth_label); */
-/*   gtk_widget_hide(auth_userframe); */
-/*   gtk_widget_hide(auth_userentry); */
-/*   gtk_widget_hide(auth_passframe); */
-/*   gtk_widget_hide(auth_passentry); */
-/*   gtk_widget_hide(auth_ok); */
 
-/*   gtk_widget_destroy(auth_label); */
-/*   gtk_widget_destroy(auth_userentry); */
-/*   gtk_widget_destroy(auth_userframe); */
-/*   gtk_widget_destroy(auth_passentry); */
-/*   gtk_widget_destroy(auth_passframe); */
-/*   gtk_widget_destroy(auth_ok); */
-/*   gtk_widget_destroy(auth_vbox); */
   gtk_widget_destroy(auth_window);
 
   gsp_auth_done = TRUE;
-  
+
 }
 
 /* Show available categories */
@@ -1432,9 +1436,9 @@ show_categories(void)
 
   len = 0;
 
-  for(i=0; i<(sizeof(pr_categories)/sizeof(char *)); i++) {
+  for (i = 0; i < (sizeof(pr_categories)/sizeof(char *)); i++) {
 
-    if(strlen(pr_categories[i]) > len ) len = strlen(pr_categories[i]);
+    if (strlen(pr_categories[i]) > len ) len = strlen(pr_categories[i]);
 
   }
 
@@ -1442,11 +1446,11 @@ show_categories(void)
 
   written = 0;
 
-  for(i=0; i<(sizeof(pr_categories)/sizeof(char *)); i++) {
+  for (i = 0; i < (sizeof(pr_categories)/sizeof(char *)); i++) {
 
     written += printf(my_fmt, pr_categories[i]);
 
-    if(written >= 70 ) {
+    if (written >= 70 ) {
 
       written = 0;
       printf("\n");

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -50,13 +50,12 @@ extern char *tzname[2];
 #define TRUE 1
 #endif
 
-#define SMTP_DEBUG(x) printf("Debug %i\n",x);
-
 static void build_message(FILE *, PROBLEM_REPORT *);
 static int authinteract(auth_client_request_t request, 
 			char **result, int fields, void *arg);
 
-static int tlsinteract(char *, int , int , void *);
+static void event_cb(smtp_session_t session, 
+		     int event_no, void *arg, ...);
 
 char global_smtp_error_msg[1024];
 static GSP_AUTH *my_auth = NULL;
@@ -128,8 +127,6 @@ send_pr(PROBLEM_REPORT *mypr)
   session = smtp_create_session();
   message = smtp_add_message(session);
 
-  printf("Before starttls...\n");
-
   switch (mypr->ssl_mode) {
 
   case GSP_SSL_NO :
@@ -149,10 +146,6 @@ send_pr(PROBLEM_REPORT *mypr)
 
   }
 
-  printf("After starttls...\n");
-
-  //  smtp_starttls_set_password_cb(tlsinteract, NULL);
-
   snprintf(my_smtp_server, 1024, "%s:%s", mypr->smtp_server, mypr->smtp_port);
 
   host = my_smtp_server;
@@ -162,6 +155,8 @@ send_pr(PROBLEM_REPORT *mypr)
   authctx = auth_create_context();
   auth_set_mechanism_flags(authctx, AUTH_PLUGIN_PLAIN, 0);
   auth_set_interact_cb(authctx, authinteract, NULL);
+
+  smtp_set_eventcb(session, event_cb, NULL);
 
   if (!noauth) {
 
@@ -327,16 +322,56 @@ authinteract(auth_client_request_t request,
 
 }
 
-static int
-tlsinteract(char *buf, int buflen, int rwflag , void *arg )
+/* 
+ * We currently just return 1 to keep libesmtp happy
+ * Wil turn this into a proper event handler some day
+ */
+void 
+event_cb(smtp_session_t session, int event_no, void *arg,...)
 {
-  char *pw;
-  int len;
+  va_list alist;
+  int *ok;
+  long foo;
+  int bar;
 
-  pw = getpass ("certificate password");
-  len = strlen (pw);
-  if (len + 1 > buflen)
-    return 0;
-  strcpy (buf, pw);
-  return len;
+  va_start(alist, arg);
+
+  switch (event_no) {
+
+  case SMTP_EV_WEAK_CIPHER:
+
+    bar = va_arg(alist, long);
+    ok = va_arg(alist, int*); 
+    *ok = 1; 
+    break;
+
+  case SMTP_EV_INVALID_PEER_CERTIFICATE:
+
+    foo = va_arg(alist, long);
+    ok = va_arg(alist, int*); 
+    *ok = 1; 
+    break;
+
+  case SMTP_EV_NO_PEER_CERTIFICATE:
+  case SMTP_EV_WRONG_PEER_CERTIFICATE:
+  case SMTP_EV_NO_CLIENT_CERTIFICATE:
+
+    ok = va_arg(alist, int*); 
+    *ok = 1; 
+    break;
+
+  case SMTP_EV_CONNECT: 
+  case SMTP_EV_MAILSTATUS:
+  case SMTP_EV_RCPTSTATUS:
+  case SMTP_EV_MESSAGEDATA:
+  case SMTP_EV_MESSAGESENT:
+  case SMTP_EV_DISCONNECT: 
+  default:
+
+    break;
+
+  }
+
+  va_end(alist);
+
 }

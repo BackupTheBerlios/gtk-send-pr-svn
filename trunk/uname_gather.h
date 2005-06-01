@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -25,5 +25,9 @@
 
 */
 
+#ifndef UNAME_GATHER_H
+#define UNAME_GATHER_H
+
 int uname_gather(char *,char *);
 
+#endif

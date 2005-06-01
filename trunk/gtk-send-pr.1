@@ -54,7 +54,17 @@ The first tab contains user info, as well as SMTP settings. Do not forget
 to properly set the SMTP server, or the program will fail when trying to 
 send the PR. If the server requires SMTP AUTH, you will be prompted for a user
 name and password. If the server runs on a non-standard port (other than 25), set the port
-to the appropriate value. Most users don't need to change that. Also users should not modify the 
+to the appropriate value. You can enable SSL by setting the SSL option to 
+.Do
+Use SSL if possible
+.Dc or
+.Do
+Always Use SSL
+.Dc . The program expects a file containing both your private RSA key and your certificate to be 
+located at 
+.Pa ~/.authenticate/private/smtp-starttls.pem
+, whith permissions set to 0600 or 0400, otherwise it will be ignored by libesmtp. Password 
+protected certificates are not yet supported. Users should not modify the 
 .Do
 To
 .Dc address.

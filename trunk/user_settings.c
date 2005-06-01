@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -56,6 +56,7 @@ save_settings(USER_PROFILE *my_profile)
   char temp_smtp[1024];
   char temp_geometry[1024];
   char temp_smtp_port[1024];
+  char temp_ssl_mode[1024];
 
   int i,j;
   FILE *f;
@@ -67,21 +68,21 @@ save_settings(USER_PROFILE *my_profile)
   snprintf(temp, 1024, "%s/%s", homedir, ".gtk-send-pr");
 	
   i = stat(temp, &sb);
-  if(i == -1) {
+  if (i == -1) {
 	
-    j=mkdir(temp,0700);
+    j = mkdir(temp,0700);
 	
-  } else if((sb.st_mode & S_IFDIR) != S_IFDIR){
+  } else if ((sb.st_mode & S_IFDIR) != S_IFDIR){
 	
     j = unlink(temp);
 
-    if(j != -1) {
+    if (j != -1) {
 		
       j = mkdir(temp,0700);
 		
     }
 	
-    if(j == -1) return;
+    if (j == -1) return;
 	
   }
 	
@@ -91,6 +92,7 @@ save_settings(USER_PROFILE *my_profile)
   snprintf(temp_smtp,1024, "%s/smtp", temp);
   snprintf(temp_geometry, 1024, "%s/geometry", temp);
   snprintf(temp_smtp_port, 1024, "%s/smtp_port", temp);
+  snprintf(temp_ssl_mode, 1024, "%s/ssl_mode", temp);
 
   if(strncmp(my_profile->name, old_profile.name,
 	     (sizeof(((USER_PROFILE *) 0)->name)))!=0 || migration==1) {
@@ -142,6 +144,16 @@ save_settings(USER_PROFILE *my_profile)
 
   }
 
+  if ((my_profile->ssl_mode != old_profile.ssl_mode) || 
+      (migration == 1)) {
+
+    f = fopen(temp_ssl_mode, "w");
+    if (f == NULL) return;
+    fprintf(f, "%i", my_profile->ssl_mode);
+    fclose(f);
+
+  }
+
   if( ((my_profile->geom_x != old_profile.geom_x) || 
        (my_profile->geom_y != old_profile.geom_y) ) ||
       migration == 1) {
@@ -169,30 +181,31 @@ load_settings(USER_PROFILE *my_profile)
   char temp_org[1024];
   char temp_smtp[1024];
   char temp_smtp_port[1024];
+  char temp_ssl_mode[1024];
   char temp_geometry[1024];
   int fd;
   FILE *f;
   struct stat sb;
 
-
   migration = 0;
   homedir = getenv("HOME");
   assert(homedir != NULL);
-	
+
   snprintf(temp,1024, "%s/%s", homedir, ".gtk-send-pr");
-  i=stat(temp, &sb);
-  if(i == -1) {	
-		
+  i = stat(temp, &sb);
+  if (i == -1) {	
+
     snprintf(temp, 1024, "%s/%s", homedir, ".gtk-send-pr-rc");
     fd = open(temp, O_RDONLY, 0);
-    if(fd != -1) {
+    if (fd != -1) {
+
       read(fd, my_profile, sizeof(USER_PROFILE));
       close(fd);
       unlink(temp);
       migration = 1;
 
     } else  {
-		
+
       /* Let's see who I am */
       pr_user = getpwuid(getuid());
 
@@ -203,21 +216,22 @@ load_settings(USER_PROFILE *my_profile)
       sprintf(my_profile->org, " ");
       sprintf(my_profile->smtp, "FILL THIS!!!");
       sprintf(my_profile->smtp_port, "25");
+      my_profile->ssl_mode = GSP_SSL_NO;
 
     }
-		
+
   } else {
-	
-		
+
     snprintf(temp_name,1024, "%s/name", temp);
     snprintf(temp_email,1024,"%s/email", temp);
     snprintf(temp_org,1024, "%s/organization", temp);
     snprintf(temp_smtp,1024, "%s/smtp", temp);
     snprintf(temp_smtp_port, 1024, "%s/smtp_port", temp);
+    snprintf(temp_ssl_mode, 1024, "%s/ssl_mode", temp);
     snprintf(temp_geometry,1024, "%s/geometry", temp);
-	
+
     fd = open(temp_name, O_RDONLY, 0);
-    if(fd != -1) {
+    if (fd != -1) {
 
       read(fd, my_profile->name, sizeof(my_profile->name));
       close(fd);
@@ -231,27 +245,27 @@ load_settings(USER_PROFILE *my_profile)
     }
 
     fd = open(temp_email, O_RDONLY, 0);
-    if(fd != -1) {
+    if (fd != -1) {
 
       read(fd, my_profile->email, sizeof(my_profile->email));
       close(fd);
 
     }
-	
+
     fd = open(temp_org, O_RDONLY,0);
-    if(fd != -1) {
+    if (fd != -1) {
 
       read(fd,my_profile->org, sizeof(my_profile->org));
       close(fd);
 
     }
-	
+
     fd = open(temp_smtp,O_RDONLY,0);
-    if(fd != -1) {
+    if (fd != -1) {
 
       read(fd, my_profile->smtp, sizeof(my_profile->smtp));
       close(fd);
-	
+
     } else {
 
       sprintf(my_profile->smtp, "FILL THIS!!!");
@@ -260,11 +274,11 @@ load_settings(USER_PROFILE *my_profile)
     }
 
     fd = open(temp_smtp_port,O_RDONLY,0);
-    if(fd != -1) {
+    if (fd != -1) {
 
       read(fd, my_profile->smtp_port, sizeof(my_profile->smtp_port));
       close(fd);
-	
+
     } else {
 
       sprintf(my_profile->smtp_port, "25");
@@ -272,8 +286,21 @@ load_settings(USER_PROFILE *my_profile)
 
     }
 
-    f=fopen(temp_geometry,"r");
-    if(f != NULL) {
+    f = fopen(temp_ssl_mode,"r");
+    if (f != NULL) {
+
+      fscanf(f, "%i", &my_profile->ssl_mode);
+      fclose(f);
+
+    } else {
+
+      my_profile->ssl_mode = GSP_SSL_NO;
+      migration = 1;
+
+    }
+
+    f = fopen(temp_geometry,"r");
+    if (f != NULL) {
 
       fscanf(f, "%i,%i", &my_profile->geom_x, &my_profile->geom_y);
       fclose(f);	
@@ -283,11 +310,12 @@ load_settings(USER_PROFILE *my_profile)
       my_profile->geom_x = 400;
       my_profile->geom_y = 480;
       migration = 1;
+
     }
 
   }
   /* Keep a copy of the user profile */
   memcpy(&old_profile, my_profile, sizeof(USER_PROFILE));
   return;
-	
+
 }

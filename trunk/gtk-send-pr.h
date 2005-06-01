@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,11 @@
 
 */
 
+#ifndef GTK_SEND_PR_H
+#define GTK_SEND_PR_H
+
 #define GSP_VERSION "0.4.5"
-#define GSP_CODENAME "\"Do It For The Kids\""
+#define GSP_CODENAME "\"The Power Of Orange Knickers\""
 
 #define GSP_SSL_NO 0
 #define GSP_SSL_EN 1
@@ -85,3 +88,4 @@ typedef struct gsp_auth {
 #define MAINT_NO 0
 #define MAINT_YES 1
 
+#endif
