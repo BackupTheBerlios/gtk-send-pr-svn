@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2003, Miguel Mendez. All rights reserved.
+Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@ $Id$
 
 */
 
-#define GSP_VERSION "0.3"
-#define GSP_CODENAME "\"Money can buy me love\""
+#define GSP_VERSION "0.3.1"
+#define GSP_CODENAME "\"022 : The umask of the beast.\""
 typedef struct user_prfile {
 
 	char name[255];

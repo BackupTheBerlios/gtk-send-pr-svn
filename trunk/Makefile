@@ -20,6 +20,10 @@ OBJECTS= main.o gtk_ui.o user_settings.o smtp.o file.o
 all:	$(OBJECTS)
 	$(CC) $(LDFLAGS) -o gtk-send-pr $(OBJECTS)
 
+install:
+	${BSD_INSTALL_PROGRAM} gtk-send-pr ${PREFIX}/bin
+	${BSD_INSTALL_MAN} gtk-send-pr.1 ${PREFIX}/man/man1
+
 clean:
 	rm -f *.o gtk-send-pr gtk-send-pr.core
 
