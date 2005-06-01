@@ -73,6 +73,7 @@ send_pr(PROBLEM_REPORT *mypr)
   enum notify_flags notify = Notify_SUCCESS|Notify_FAILURE;
   FILE *fp;
   char tempfile[1024];
+  char *tmpdir;
   int  tempfd;
 
   char my_smtp_server[1024];
@@ -89,7 +90,18 @@ send_pr(PROBLEM_REPORT *mypr)
 
   }
 
+  tmpdir = getenv("TMPDIR");
+
+  if(tmpdir != NULL) {
+
+  sprintf(tempfile, "%s/gtk-send-pr.XXXXXXXX", tmpdir);
+
+  } else {
+
   sprintf(tempfile, "/tmp/gtk-send-pr.XXXXXXXX");
+
+  }
+
   tempfd=mkstemp(tempfile);
   fp=fdopen(tempfd, "w");
 

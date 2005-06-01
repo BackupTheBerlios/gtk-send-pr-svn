@@ -118,7 +118,7 @@ int open_menu_up;
 int gsp_auth_done;
 GSP_AUTH *auth_info;
 
-int
+int 
 create_gtk_ui(char *included_file)
 {
 
@@ -164,11 +164,15 @@ create_gtk_ui(char *included_file)
   GtkWidget	*type_vbox;
   GtkWidget	*type_frame1;
   GtkWidget	*type_frame2;
+  GList		*type_items1 = NULL;
   GtkWidget	*type_frame3;
+  GList		*type_items2 = NULL;
   GtkWidget	*type_frame4;
+  GList		*type_items3 = NULL;
   GtkWidget	*type_frame5;
+  GList		*type_items4 = NULL;
   GtkWidget	*system_vbox;
-  GtkWidget	*system_frame1;
+  GtkWidget	*system_frame1;		
   GtkWidget	*system_frame2;
 
   GtkTextBuffer *system_buffer1;
@@ -180,7 +184,7 @@ create_gtk_ui(char *included_file)
 
   GtkWidget	*scrolled_window2;
   GtkWidget	*scrolled_window3;
-  GtkWidget	*scrolled_window4;		
+  GtkWidget	*scrolled_window4;				
 
   GtkWidget *fix_vbox;
   GtkWidget *fix_hbuttons;
@@ -196,10 +200,6 @@ create_gtk_ui(char *included_file)
   GdkPixbuf *icon48_pixbuf;
   GdkPixbuf *icon64_pixbuf;
   GList *icon_list = NULL;
-  //  GList *type_items1 = NULL;
-  GList *type_items2 = NULL;
-  GList *type_items3 = NULL;
-  GList *type_items4 = NULL;
 
   char uname_srm[256];
   char uname_snrvm[1024]; /* better safe than sorry */
@@ -223,7 +223,7 @@ create_gtk_ui(char *included_file)
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(window),TRUE);
   gtk_window_set_title(GTK_WINDOW(window), "GTK Send-PR " GSP_VERSION);
-  gtk_window_set_default_size(GTK_WINDOW(window), my_profile.geom_x, my_profile.geom_y);
+  gtk_window_set_default_size(GTK_WINDOW(window),my_profile.geom_x,my_profile.geom_y);
 
   /* Set the icon */
   icon16_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp16_xpm);
@@ -233,7 +233,7 @@ create_gtk_ui(char *included_file)
 
   g_list_append(icon_list, icon16_pixbuf);
   g_list_append(icon_list, icon32_pixbuf);
-  g_list_append(icon_list, icon48_pixbuf);
+  g_list_append(icon_list, icon48_pixbuf);	
   g_list_append(icon_list, icon64_pixbuf);
 
   gtk_window_set_icon(GTK_WINDOW(window), icon64_pixbuf);
@@ -306,7 +306,7 @@ create_gtk_ui(char *included_file)
 		   GTK_SIGNAL_FUNC(send_pressed), NULL);
 
   g_signal_connect(GTK_OBJECT(help_button), "clicked",
-		   GTK_SIGNAL_FUNC(help_pressed), NULL);		
+		   GTK_SIGNAL_FUNC(help_pressed), NULL);				
 
   vbox1 = gtk_vbox_new(FALSE, 2);
   hseparator1 = gtk_hseparator_new ();
@@ -386,12 +386,13 @@ create_gtk_ui(char *included_file)
 
   /* Severity */
   type_frame2=gtk_frame_new(" Severity ");
-  
-  type_combo1 = gtk_combo_box_entry_new_text();
+
   for(i=0;i<(sizeof(pr_severities)/sizeof(char *));i++) {
-    gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo1), pr_severities[i]);
+    type_items1 = g_list_append (type_items1, pr_severities[i]);
   }
-  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo1), 1);
+
+  type_combo1 = gtk_combo_new();
+  gtk_combo_set_popdown_strings (GTK_COMBO(type_combo1), type_items1);
 
   gtk_container_add(GTK_CONTAINER(type_frame1), type_entry1);
   gtk_container_add(GTK_CONTAINER(type_frame2), type_combo1);
@@ -402,9 +403,7 @@ create_gtk_ui(char *included_file)
   /* Priority */
   type_frame3=gtk_frame_new(" Priority ");
   for(i=0;i<(sizeof(pr_priorities)/sizeof(char *));i++) {
-
     type_items2 = g_list_append (type_items2, pr_priorities[i]);
-
   }
 
   type_combo2 = gtk_combo_new();
@@ -416,9 +415,7 @@ create_gtk_ui(char *included_file)
   /* Category */
   type_frame4=gtk_frame_new(" Category ");
   for(i=0;i<(sizeof(pr_categories)/sizeof(char *));i++) {
-
     type_items3 = g_list_append (type_items3, pr_categories[i]);
-
   }
   type_combo3 = gtk_combo_new();
   gtk_combo_set_popdown_strings(GTK_COMBO (type_combo3), type_items3);
@@ -429,9 +426,7 @@ create_gtk_ui(char *included_file)
   /* Class */
   type_frame5=gtk_frame_new(" Class ");
   for(i=0;i<(sizeof(pr_classes)/sizeof(char *));i++) {
-
     type_items4 = g_list_append (type_items4, pr_classes[i]);
-
   }	
 
   type_combo4 = gtk_combo_new();
@@ -583,9 +578,95 @@ create_gtk_ui(char *included_file)
   gtk_box_set_homogeneous(GTK_BOX(vbox1), FALSE);
   gtk_container_add(GTK_CONTAINER(window), vbox1);
 
-  /* Handy call, no need to call gtk_widget_show for every single widget */
-  gtk_widget_show_all(window);
+  gtk_widget_show(mynotebook);
+  gtk_widget_show(vbox1);
 
+  gtk_widget_show(email_frame1);
+  gtk_widget_show(email_entry1);
+
+  gtk_widget_show(email_frame2);
+  gtk_widget_show(email_entry2);
+
+  gtk_widget_show(email_frame3);
+  gtk_widget_show(email_entry3);
+
+  gtk_widget_show(email_frame4);
+  gtk_widget_show(email_entry4);				
+
+  gtk_widget_show(email_frame5);
+  gtk_widget_show(email_entry5);
+
+  gtk_widget_show(email_frame6);
+  gtk_widget_show(email_entry6);	
+
+  gtk_widget_show(email_frame7);
+  gtk_widget_show(email_entry7);
+
+  gtk_widget_show(email_frame8);
+  gtk_widget_show(email_entry8);
+
+  gtk_widget_show(email_vbox);
+
+  gtk_widget_show(type_frame1);
+  gtk_widget_show(type_entry1);	
+
+  gtk_widget_show(type_frame2);
+  gtk_widget_show(type_combo1);
+
+  gtk_widget_show(type_frame3);
+  gtk_widget_show(type_combo2);
+
+  gtk_widget_show(type_frame4);
+  gtk_widget_show(type_combo3);	
+
+  gtk_widget_show(type_frame5);
+  gtk_widget_show(type_combo4);
+	
+  gtk_widget_show(type_vbox);
+
+  gtk_widget_show(system_frame1);
+  gtk_widget_show(system_entry1);
+
+  gtk_widget_show(system_frame2);
+  gtk_widget_show(system_view1);
+  gtk_widget_show(scrolled_window1);
+	
+  gtk_widget_show(system_vbox);
+
+  gtk_widget_show(details_frame1);
+  gtk_widget_show(details_view1);
+  gtk_widget_show(scrolled_window2);
+
+  gtk_widget_show(details_frame2);
+  gtk_widget_show(details_view2);
+  gtk_widget_show(scrolled_window3);
+
+  gtk_widget_show(details_vbox);
+
+  gtk_widget_show(fix_frame);
+  gtk_widget_show(fix_view);
+  gtk_widget_show(scrolled_window4);
+  gtk_widget_show(fix_hbuttons);
+  gtk_widget_show(fix_button1);
+  gtk_widget_show(fix_button2);
+  gtk_widget_show(fix_vbox);
+
+  gtk_widget_show(hseparator1);
+  gtk_widget_show(h_buttons);
+  gtk_widget_show(send_button);
+  gtk_widget_show(send_label);
+  gtk_widget_show(send_hbox);
+  gtk_widget_show(send_icon);
+  gtk_widget_show(send_align);
+  gtk_widget_show(quit_button);
+  gtk_widget_show(about_button);
+  gtk_widget_show(about_label);
+  gtk_widget_show(about_hbox);
+  gtk_widget_show(about_icon);
+  gtk_widget_show(about_align);
+  gtk_widget_show(help_button);
+  gtk_widget_show(window);
+	
   /* Let the show begin */
   gtk_main ();
 
@@ -671,7 +752,7 @@ quit_pressed( GtkWidget *widget, gpointer data)
     gtk_main_quit();
 
   }
-
+        
 }
 
 
@@ -861,7 +942,7 @@ void fill_pr(PROBLEM_REPORT *mypr)
     do {
       temp_cc=strsep(&cc_field,",");
       if(temp_cc!=NULL) {
-
+	
 	mypr->smtp_cc[mypr->smtp_cc_num]=temp_cc;
 	mypr->smtp_cc_num++;
       }
@@ -879,10 +960,10 @@ void fill_pr(PROBLEM_REPORT *mypr)
   mypr->originator=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry6));
   mypr->organization=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry7));
   mypr->synopsis=(char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
-    mypr->severity=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo1)->child));
-  mypr->priority=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo2)->child));
-  mypr->category=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo3)->child));
-  mypr->class=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo4)->child));
+  mypr->severity=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo1)->entry));
+  mypr->priority=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo2)->entry));
+  mypr->category=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo3)->entry));
+  mypr->class=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo4)->entry));
   mypr->release=(char *)gtk_entry_get_text(GTK_ENTRY(system_entry1));
 
   buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(system_view1));
@@ -942,7 +1023,7 @@ void fill_pr(PROBLEM_REPORT *mypr)
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
   from=gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
-
+        					 
   how_buffer=malloc(2*i+16); /* Let's be convervative here */
   memset(how_buffer,0,2*i+16);
   ctmp=how_buffer;
@@ -968,7 +1049,7 @@ void fill_pr(PROBLEM_REPORT *mypr)
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
   from=gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
-
+        	 
   fix_buffer=malloc(2*i+16); /* Let's be convervative here */
   memset(fix_buffer,0,2*i+16);
   ctmp=fix_buffer;
@@ -1062,7 +1143,14 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
   gtk_box_set_homogeneous(GTK_BOX(auth_vbox), FALSE);
   gtk_container_add(GTK_CONTAINER(auth_window), auth_vbox);
 
-  gtk_widget_show_all(auth_window);
+  gtk_widget_show(auth_window);
+  gtk_widget_show(auth_vbox);
+  gtk_widget_show(auth_label);
+  gtk_widget_show(auth_userframe);
+  gtk_widget_show(auth_userentry);
+  gtk_widget_show(auth_passframe);
+  gtk_widget_show(auth_passentry);
+  gtk_widget_show(auth_ok);
 
   while(gsp_auth_done!=TRUE) {
 
@@ -1081,27 +1169,25 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   /* Keep a copy before destroying the widgets */
   strncpy(auth_info->username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)),1023);
   strncpy(auth_info->password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)),1023);
+  
+  gtk_widget_hide(auth_window);
+  gtk_widget_hide(auth_vbox);
+  gtk_widget_hide(auth_label);
+  gtk_widget_hide(auth_userframe);
+  gtk_widget_hide(auth_userentry);
+  gtk_widget_hide(auth_passframe);
+  gtk_widget_hide(auth_passentry);
+  gtk_widget_hide(auth_ok);
 
-  gtk_widget_hide_all(auth_window);
-
-/*   gtk_widget_hide(auth_vbox); */
-/*   gtk_widget_hide(auth_label); */
-/*   gtk_widget_hide(auth_userframe); */
-/*   gtk_widget_hide(auth_userentry); */
-/*   gtk_widget_hide(auth_passframe); */
-/*   gtk_widget_hide(auth_passentry); */
-/*   gtk_widget_hide(auth_ok); */
-
-/*   gtk_widget_destroy(auth_label); */
-/*   gtk_widget_destroy(auth_userentry); */
-/*   gtk_widget_destroy(auth_userframe); */
-/*   gtk_widget_destroy(auth_passentry); */
-/*   gtk_widget_destroy(auth_passframe); */
-/*   gtk_widget_destroy(auth_ok); */
-/*   gtk_widget_destroy(auth_vbox); */
-
+  gtk_widget_destroy(auth_label);
+  gtk_widget_destroy(auth_userentry);
+  gtk_widget_destroy(auth_userframe);
+  gtk_widget_destroy(auth_passentry);
+  gtk_widget_destroy(auth_passframe);
+  gtk_widget_destroy(auth_ok);
+  gtk_widget_destroy(auth_vbox);
   gtk_widget_destroy(auth_window);
 
   gsp_auth_done=TRUE;
-
+  
 }
