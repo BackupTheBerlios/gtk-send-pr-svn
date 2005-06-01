@@ -26,7 +26,7 @@
 */
 
 #define GSP_VERSION "0.3.2"
-#define GSP_CODENAME "\"Sweet Amber\""
+#define GSP_CODENAME "\"Pure Shoes\""
 
 typedef struct user_prfile {
 

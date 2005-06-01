@@ -80,9 +80,15 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
   char my_recipient[1024];
   char buf[128];
 
-  my_auth=malloc(sizeof(GSP_AUTH));
-  my_auth->username=NULL;
-  my_auth->password=NULL;
+  if(gsp_auth_done!=TRUE) {
+
+    my_auth=malloc(sizeof(GSP_AUTH));
+    my_auth->username=malloc(1024);
+    memset(my_auth->username, 0, 1024);
+    my_auth->password=malloc(1024);
+    memset(my_auth->password, 0, 1024);
+
+  }
 
   sprintf(tempfile, "/tmp/gtk-send-pr.XXXXXXXX");
   tempfd=mkstemp(tempfile);
@@ -141,10 +147,18 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
     }
   }
 
-  if (!smtp_start_session (session)) {
+  if (!smtp_start_session(session)) {
 
     snprintf(global_smtp_error_msg,1024,"SMTP server problem : %s\n",
 	     smtp_strerror(smtp_errno(), buf, sizeof buf));
+
+    status = smtp_message_transfer_status(message);
+    smtp_destroy_session(session);
+    auth_destroy_context(authctx);
+    fclose(fp);
+    unlink(tempfile);
+    auth_client_exit();
+
     return(-1);
 
   } else {
@@ -155,7 +169,7 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
     fclose(fp);
     unlink(tempfile);
     auth_client_exit();
-    free(my_auth);
+
     return(0);
 
   }
@@ -213,32 +227,30 @@ authinteract(auth_client_request_t request, char **result, int fields, void *arg
 {
   int i;
 
+  if(gsp_auth_done!=TRUE) {
+
+    gsp_smtp_auth_dialog(my_auth);
+
+  }
+
   for(i=0; i<fields; i++) {
 
     if(request[i].flags & AUTH_PASS) {
 
-      if(gsp_auth_done!=TRUE) {
-
-	gsp_smtp_auth_dialog(my_auth);
-
-      }
       result[i] = my_auth->password;
 
     } else if(request[i].flags & AUTH_USER) {
 
-      if(gsp_auth_done!=TRUE) {
-
-	gsp_smtp_auth_dialog(my_auth);
-
-      }
-
       result[i] = my_auth->username;
 
+    } else if(result[i] == NULL) {
+
+      return 0;
+
     }
-
-    if (result[i] == NULL) return 0;
-
+  
   }
 
   return 1;
+
 }

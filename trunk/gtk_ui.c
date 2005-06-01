@@ -24,6 +24,7 @@
   $Id$
 
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -112,13 +113,18 @@ int open_menu_up;
 int gsp_auth_done;
 GSP_AUTH *auth_info;
 
-char auth_username[1024];
-char auth_password[1024];
-
 int 
 create_gtk_ui(char *included_file)
 {
 
+  GtkWidget *about_icon;
+  GtkWidget *about_label;
+  GtkWidget *about_hbox;
+  GtkWidget *about_align;
+  GtkWidget *send_icon;
+  GtkWidget *send_label;
+  GtkWidget *send_hbox;
+  GtkWidget *send_align;
   GtkWidget *quit_button;
   GtkWidget *about_button;
   GtkWidget *help_button;
@@ -193,8 +199,6 @@ create_gtk_ui(char *included_file)
 
   open_menu_up=0;
   gsp_auth_done=FALSE;
-  memset(auth_username, 0, 1024);
-  memset(auth_password, 0, 1024);
 
   /* Let's go */
 
@@ -226,9 +230,28 @@ create_gtk_ui(char *included_file)
   gtk_window_set_default_size(GTK_WINDOW(window),my_profile.geom_x,my_profile.geom_y);
 
   /* Basic buttons */
-  send_button = gtk_button_new_from_stock("Send");
+  send_button = gtk_button_new();
+  send_icon = gtk_image_new_from_stock(GTK_STOCK_APPLY, GTK_ICON_SIZE_MENU);
+  send_label = gtk_label_new("Send");
+  send_hbox = gtk_hbox_new(FALSE, 2);
+  send_align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
+  gtk_box_pack_start(GTK_BOX(send_hbox), send_icon, FALSE, FALSE, 0);
+  gtk_box_pack_end(GTK_BOX(send_hbox), send_label, FALSE, FALSE, 0);
+  gtk_container_add(GTK_CONTAINER(send_button), send_align);
+  gtk_container_add(GTK_CONTAINER(send_align), send_hbox);
+
   quit_button = gtk_button_new_from_stock(GTK_STOCK_QUIT);
-  about_button = gtk_button_new_with_label("About");
+
+  about_button = gtk_button_new();
+  about_icon = gtk_image_new_from_stock(GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
+  about_label = gtk_label_new("About");
+  about_hbox = gtk_hbox_new(FALSE, 2);
+  about_align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
+  gtk_box_pack_start(GTK_BOX(about_hbox), about_icon, FALSE, FALSE, 0);
+  gtk_box_pack_end(GTK_BOX(about_hbox), about_label, FALSE, FALSE, 0);
+  gtk_container_add(GTK_CONTAINER(about_button), about_align);
+  gtk_container_add(GTK_CONTAINER(about_align), about_hbox);
+
   help_button = gtk_button_new_from_stock(GTK_STOCK_HELP);
 
   /* Button tooltips */
@@ -619,8 +642,16 @@ create_gtk_ui(char *included_file)
   gtk_widget_show(hseparator1);
   gtk_widget_show(h_buttons);
   gtk_widget_show(send_button);
+  gtk_widget_show(send_label);
+  gtk_widget_show(send_hbox);
+  gtk_widget_show(send_icon);
+  gtk_widget_show(send_align);
   gtk_widget_show(quit_button);
   gtk_widget_show(about_button);
+  gtk_widget_show(about_label);
+  gtk_widget_show(about_hbox);
+  gtk_widget_show(about_icon);
+  gtk_widget_show(about_align);
   gtk_widget_show(help_button);
   gtk_widget_show(window);
 	
@@ -1120,10 +1151,9 @@ void
 auth_ok_pressed( GtkWidget *widget, gpointer data)
 {
 
-  strncpy(auth_username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)),1023);
-  strncpy(auth_password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)),1023);
-  auth_info->username=auth_username;
-  auth_info->password=auth_password;
+  /* Keep a copy before destroying the widgets */
+  strncpy(auth_info->username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)),1023);
+  strncpy(auth_info->password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)),1023);
   
   gtk_widget_hide(auth_window);
   gtk_widget_hide(auth_vbox);
