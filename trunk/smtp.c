@@ -32,7 +32,6 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <sys/utsname.h>
 #include <unistd.h>
 #include <pwd.h>
 
@@ -51,7 +50,7 @@ extern char *tzname[2];
 #endif
 
 
-void build_message(FILE *, PROBLEM_REPORT *, struct utsname *);
+void build_message(FILE *, PROBLEM_REPORT *);
 int authinteract(auth_client_request_t request, char **result, int fields, void *arg);
 
 char global_smtp_error_msg[1024];
@@ -60,7 +59,7 @@ GSP_AUTH *my_auth=NULL;
 extern int gsp_auth_done;
 	
 int
-send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
+send_pr(PROBLEM_REPORT *mypr)
 {
   smtp_session_t session;
   smtp_message_t message;
@@ -94,7 +93,7 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
   tempfd=mkstemp(tempfile);
   fp=fdopen(tempfd, "w");
 
-  build_message(fp, mypr, my_uname);
+  build_message(fp, mypr);
 
   fclose(fp);
 
@@ -177,7 +176,7 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
 }
 
 void 
-build_message(FILE *fp,PROBLEM_REPORT *mypr,struct utsname *my_uname)
+build_message(FILE *fp,PROBLEM_REPORT *mypr)
 {
 
   fprintf(fp,"Return-Path: <%s>\r\n",mypr->smtp_from);

@@ -25,5 +25,5 @@
 
 */
 
-int send_pr(PROBLEM_REPORT *,struct utsname *);
+int send_pr(PROBLEM_REPORT *);
 

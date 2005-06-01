@@ -33,7 +33,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/uio.h>
-#include <sys/utsname.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <libgen.h>
@@ -49,6 +48,7 @@ extern char *tzname[2];
 #include "pr_defs.h"
 #include "user_settings.h"
 #include "file.h"
+#include "uname_gather.h"
 
 extern char global_smtp_error_msg[1024];
 
@@ -71,7 +71,7 @@ extern char *included_file;
 int dirty;
 GtkWidget *window;
 struct passwd *my_user;
-struct utsname my_uname;
+
 USER_PROFILE my_profile;
 GtkWidget *type_entry1;
 
@@ -197,29 +197,14 @@ create_gtk_ui(char *included_file)
   GtkWidget *file_dialog;
   char file_warning[1024];
 
+
   open_menu_up=0;
   gsp_auth_done=FALSE;
 
   /* Let's go */
 
-  i=uname(&my_uname);
-  if(i==-1) {
-    perror("uname()");
-    exit(EXIT_FAILURE);
-  }
-
   load_settings(&my_profile);
-
-  snprintf(uname_srm,255,"%s %s %s",my_uname.sysname,
-	   my_uname.release,
-	   my_uname.machine);
-
-  snprintf(uname_snrvm,1023,"System: %s %s %s %s %s",
-	   my_uname.sysname,
-	   my_uname.nodename,
-	   my_uname.release,
-	   my_uname.version,
-	   my_uname.machine);
+  uname_gather(uname_srm, uname_snrvm);
 
   dirty=1;
   /* Define main window */
@@ -792,7 +777,7 @@ send_pressed( GtkWidget *widget, gpointer data)
 
 
   fill_pr(&mypr);
-  retcode=send_pr(&mypr,&my_uname);
+  retcode=send_pr(&mypr);
 
   if(retcode==0) {
 

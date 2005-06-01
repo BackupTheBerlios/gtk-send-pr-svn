@@ -15,8 +15,8 @@ LDFLAGS+= ${GTK_LDFLAGS} ${ESMTP_LDFLAGS}
 LDFLAGS+= -L${LOCALBASE}/lib -lefence
 .endif
 
-OBJECTS= main.o gtk_ui.o user_settings.o smtp.o file.o
-HEADERS= file.h gtk_ui.h smtp.h gtk-send-pr.h pr_defs.h user_settings.h
+OBJECTS= main.o gtk_ui.o user_settings.o smtp.o file.o uname_gather.o
+HEADERS= file.h gtk_ui.h smtp.h gtk-send-pr.h pr_defs.h user_settings.h uname_gather.h
 
 all:	$(OBJECTS)
 	$(CC) $(LDFLAGS) -o gtk-send-pr $(OBJECTS)
