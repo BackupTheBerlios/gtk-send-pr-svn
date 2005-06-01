@@ -50,10 +50,10 @@ extern char *tzname[2];
 #include "file.h"
 #include "uname_gather.h"
 
-#include "gsp16.xpm"
-#include "gsp32.xpm"
-#include "gsp48.xpm"
-#include "gsp64.xpm"
+#include "ladybug16.xpm"
+#include "ladybug32.xpm"
+#include "ladybug48.xpm"
+#include "ladybug64.xpm"
 
 extern char global_smtp_error_msg[1024];
 
@@ -226,10 +226,10 @@ create_gtk_ui(char *included_file)
   gtk_window_set_default_size(GTK_WINDOW(window),my_profile.geom_x,my_profile.geom_y);
 
   /* Set the icon */
-  icon16_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp16_xpm);
-  icon32_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp32_xpm);
-  icon48_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp48_xpm);
-  icon64_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp64_xpm);
+  icon16_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug16);
+  icon32_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug32);
+  icon48_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug48);
+  icon64_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug64);
 
   g_list_append(icon_list, icon16_pixbuf);
   g_list_append(icon_list, icon32_pixbuf);
