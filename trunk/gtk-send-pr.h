@@ -25,8 +25,8 @@
 
 */
 
-#define GSP_VERSION "0.3.2"
-#define GSP_CODENAME "\"Pure Shores\""
+#define GSP_VERSION "0.3.3"
+#define GSP_CODENAME "\"Desert Dream\""
 
 typedef struct user_prfile {
 

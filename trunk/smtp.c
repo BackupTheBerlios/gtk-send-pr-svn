@@ -130,7 +130,7 @@ send_pr(PROBLEM_REPORT *mypr)
   smtp_set_message_fp(message, fp);
 
   /* Recipient must be in RFC2821 format */
-  snprintf(my_recipient,1024,"\"%s\" <%s>",mypr->smtp_rcpt,mypr->smtp_to);
+  snprintf(my_recipient,1024,"%s",mypr->smtp_to);
   recipient = smtp_add_recipient(message, my_recipient);
   smtp_dsn_set_notify(recipient, notify);
 
@@ -139,7 +139,7 @@ send_pr(PROBLEM_REPORT *mypr)
     for(i=0;i<(mypr->smtp_cc_num);i++) {
 
       smtp_set_header(message, "CC",NULL, mypr->smtp_cc[i]);
-      snprintf(my_recipient,1024,"<%s>",mypr->smtp_cc[i]);
+      snprintf(my_recipient,1024,"%s",mypr->smtp_cc[i]);
       recipient = smtp_add_recipient (message,my_recipient);
       smtp_dsn_set_notify (recipient, notify);			
 

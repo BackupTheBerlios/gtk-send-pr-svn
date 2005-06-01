@@ -50,6 +50,11 @@ extern char *tzname[2];
 #include "file.h"
 #include "uname_gather.h"
 
+#include "gsp16.xpm"
+#include "gsp32.xpm"
+#include "gsp48.xpm"
+#include "gsp64.xpm"
+
 extern char global_smtp_error_msg[1024];
 
 gint delete_event( GtkWidget *, GdkEvent *, gpointer);
@@ -189,6 +194,12 @@ create_gtk_ui(char *included_file)
   GtkTooltips *fix_tip1;
   GtkTooltips *fix_tip2;
 
+  /* For the window icon */
+  GdkPixbuf *icon16_pixbuf;
+  GdkPixbuf *icon32_pixbuf;
+  GdkPixbuf *icon48_pixbuf;
+  GdkPixbuf *icon64_pixbuf;
+  GList *icon_list = NULL;
 
   char uname_srm[256];
   char uname_snrvm[1024]; /* better safe than sorry */
@@ -211,8 +222,24 @@ create_gtk_ui(char *included_file)
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(window),TRUE);
-  gtk_window_set_title(GTK_WINDOW(window), "GTK Send-PR");
+  gtk_window_set_title(GTK_WINDOW(window), "GTK Send-PR " GSP_VERSION);
   gtk_window_set_default_size(GTK_WINDOW(window),my_profile.geom_x,my_profile.geom_y);
+
+  /* Set the icon */
+  icon16_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp16_xpm);
+  icon32_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp32_xpm);
+  icon48_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp48_xpm);
+  icon64_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)gsp64_xpm);
+
+  g_list_append(icon_list, icon16_pixbuf);
+  g_list_append(icon_list, icon32_pixbuf);
+  g_list_append(icon_list, icon48_pixbuf);	
+  g_list_append(icon_list, icon64_pixbuf);
+
+  gtk_window_set_icon(GTK_WINDOW(window), icon64_pixbuf);
+  gtk_window_set_default_icon_list(icon_list);
+
+  g_list_free (icon_list);
 
   /* Basic buttons */
   send_button = gtk_button_new();
