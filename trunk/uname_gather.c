@@ -30,11 +30,11 @@
 
 #if defined (__FreeBSD__) || defined (__DragonFly__)
 #include <sys/types.h>
-#elif defined (__NetBSD__)
+#elif defined (__NetBSD__) || defined (__OpenBSD__)
 #include <sys/param.h>
 #endif
 
-#if defined (__FreeBSD__) || defined (__DragonFly__) || defined (__NetBSD__)
+#if defined (__FreeBSD__) || defined (__DragonFly__) || defined (__NetBSD__) || defined (__OpenBSD__)
 #include <sys/sysctl.h>
 #else
 #define USE_OLD_UNAME_METHOD

@@ -74,7 +74,7 @@ main(int argc, char **argv)
 
 }
 
-void
+static void
 usage(void)
 {
   printf("usage: gtk-send-pr [-a file] [-v] [-h]\n");
