@@ -66,8 +66,8 @@ static char *pr_categories[]= { "bin", "install", "kern", "lib", "misc", "pkg",
 				"port-playstation2", "port-pmax", "port-pmppc", "port-powerpc",
 				"port-prep", "port-sandpoint", "port-sbmips", "port-sgimips", 
 				"port-sh3", "port-sh5", "port-shark", "port-sparc", "port-sparc64",
-				"port-sun2", "port-sun3", "port-vax", "port-x68k", "port-xen", "security"
-				"standards", "toolchain", "xsrc", "y2k"
+				"port-sun2", "port-sun3", "port-vax", "port-x68k", "port-xen", 
+				"security", "standards", "toolchain", "xsrc", "y2k"
 };
 
 static char *pr_severities[]= { "non-critical", "serious", "critical" };
