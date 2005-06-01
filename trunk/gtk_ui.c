@@ -1223,23 +1223,18 @@ update_profile(void)
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
   strncpy(my_profile.email, tmp_entry, sizeof(my_profile.email));
-  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry6));
   strncpy(my_profile.name, tmp_entry, sizeof(my_profile.name));	
-  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry7));
   strncpy(my_profile.org, tmp_entry, sizeof(my_profile.org));	
-  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
   strncpy(my_profile.smtp, tmp_entry, sizeof(my_profile.smtp));
-  g_free(tmp_entry);
 
   tmp_entry = (char *)gtk_entry_get_text(GTK_ENTRY(email_port_entry));
   strncpy(my_profile.smtp_port, tmp_entry, sizeof(my_profile.smtp_port));
-  g_free(tmp_entry);
 
   tmp_entry = gtk_combo_box_get_active_text(GTK_COMBO_BOX(email_ssl_option));
 
