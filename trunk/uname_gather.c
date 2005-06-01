@@ -33,7 +33,12 @@
 #elif defined (__NetBSD__)
 #include <sys/param.h>
 #endif
+
+#if defined (__FreeBSD__) || defined (__DragonFly__) || defined (__NetBSD__)
 #include <sys/sysctl.h>
+#else
+#define USE_OLD_UNAME_METHOD
+#endif
 
 #include "uname_gather.h"
 
@@ -48,9 +53,13 @@ uname_gather(char *uname_srm,char *uname_snrvm)
 {
 
   int i;
+
+#if !defined(USE_OLD_UNAME_METHOD)
   int mib[2];
   size_t len;
   char *output;
+#endif
+
   struct utsname my_uname;
 
   i=uname(&my_uname);
@@ -62,6 +71,13 @@ uname_gather(char *uname_srm,char *uname_snrvm)
   snprintf(uname_srm,255,"%s %s %s",my_uname.sysname,
 	   my_uname.release,
 	   my_uname.machine);
+
+
+  /* 
+   * Use this method for people using pkgsrc in e.g.
+   * GNU/Linux/GNU, which uses its own proprietary and
+   * incompatible sysctl interface.
+   */
 
 #if defined (USE_OLD_UNAME_METHOD)
 
