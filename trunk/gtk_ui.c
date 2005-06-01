@@ -229,7 +229,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
   GtkWidget *file_dialog;
   char file_warning[1024];
   int load_failed = FALSE;
-  struct file_element *current;
+  struct file_element *current, *old;
 
   /* Drag and drop support */
   enum
@@ -686,7 +686,15 @@ create_gtk_ui(USER_OPTIONS *my_options)
 
   }
 
+  /* Free the linked list */
+  current = my_options->head;
+  do {
 
+    old = current;
+    current = current->next;
+    free(old);
+
+  } while(current!=NULL);
 
   scrolled_window4 = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window4), 10);
