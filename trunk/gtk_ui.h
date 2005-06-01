@@ -25,11 +25,10 @@
 
 */
 
-#ifndef GTK_UI_H
-#define GTK_UI_H
+#ifndef _GTK_UI_H_
+#define _GTK_UI_H_
 
-int create_gtk_ui(char *, int);
+int create_gtk_ui(USER_OPTIONS *);
 int gsp_smtp_auth_dialog(GSP_AUTH *);
-void show_categories(void);
 
 #endif

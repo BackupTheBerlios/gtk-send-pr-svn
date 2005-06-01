@@ -25,61 +25,42 @@
 
 */
 					
-/* Since pkgsrc is multi-platform, we default to non-FreeBSD environments now */
-#ifndef PR_DEFS_H
-#define PR_DEFS_H
+#ifndef _PR_DEFS_H_
+#define _PR_DEFS_H_
+
+typedef struct pr_defs {
+
+  char **pr_categories;
+  int  cat_num;
+
+  char **pr_severities;
+  int  sev_num;
+
+  char **pr_priorities;
+  int  pri_num;
+
+  char **pr_classes;
+  int class_num;
+
+  char *default_to;
+  char *default_rcpt;
+  char *default_sub_id;
+
+} PR_DEFS;
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
-
-static char *pr_categories[]= { "advocacy", "alpha", "amd64", "bin", "conf",
-				"docs", "gnu", "i386", "ia64", "java", "kern",
-				"misc", "ports", "powerpc", "sparc64", "standards",
-				"threads", "usb", "www"
-};
-
-static char *pr_severities[]= { "non-critical", "serious", "critical" };
-static char *pr_priorities[]= { "low", "medium", "high" };
-static char *pr_classes[]= { "sw-bug", "doc-bug", "change-request", "update", "maintainer-update"};
-static char default_to[]="FreeBSD-gnats-submit@freebsd.org";
-static char default_rcpt[]="FreeBSD gnats submit";
-static char default_sub_id[]="current-users";
 
 #define MAINT_CLASS "maintainer-update"
 #define MAINT_CAT "ports"
 
 #else
 
-static char *pr_categories[]= { "bin", "install", "kern", "lib", "misc", "pkg",
-				"port-acorn26", "port-acorn32", "port-algor",
-				"port-alpha", "port-amd64", "port-amiga", 
-				"port-amigappc", "port-arc", "port-arm", 
-				"port-atari", "port-bebox", "port-cats", 
-				"port-cesfic", "port-cobalt", "port-dreamcast",
-				"port-evbarm", "port-evbmips", "port-evbppc",
-				"port-evbsh3", "port-evbsh5", "port-hp300",
-				"port-hp700", "port-hpcarm", "port-hpcmips",
-				"port-hpcsh", "port-hppa", "port-i386", "port-iyonix",
-				"port-luna68k", "port-m68k", "port-mac68k", "port-macppc",
-				"port-mips", "port-mipsco", "port-mmeye", "port-mvme68k",
-				"port-mvmeppc", "port-netwinder", "port-news68k",
-				"port-newsmips", "port-next68k", "port-ofppc", "port-pc532",
-				"port-playstation2", "port-pmax", "port-pmppc", "port-powerpc",
-				"port-prep", "port-sandpoint", "port-sbmips", "port-sgimips", 
-				"port-sh3", "port-sh5", "port-shark", "port-sparc", "port-sparc64",
-				"port-sun2", "port-sun3", "port-vax", "port-x68k", "port-xen", 
-				"security", "standards", "toolchain", "xsrc", "y2k"
-};
-
-static char *pr_severities[]= { "non-critical", "serious", "critical" };
-static char *pr_priorities[]= { "low", "medium", "high" };
-static char *pr_classes[]= { "sw-bug", "doc-bug", "change-request", "support" };
-static char default_to[]="gnats-bugs@gnats.netbsd.org";
-static char default_rcpt[]="gnats bugs";
-static char default_sub_id[]="net";
-
 #define MAINT_CLASS "change-request"
 #define MAINT_CAT "pkg"
 
 #endif
+
+void show_categories(void);
+int fill_prdefs(PR_DEFS *);
 
 #endif

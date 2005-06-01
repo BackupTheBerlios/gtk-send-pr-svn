@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,7 @@
 
 #include "gtk-send-pr.h"
 #include "gtk_ui.h"
-
+#include "pr_defs.h"
 
 static void usage(void);
 static void about(void);
@@ -44,19 +44,24 @@ int
 main(int argc, char **argv)
 {
   int ch;
-  char included_file[FILENAME_MAX];
-  int maintainer = MAINT_NO;
-  int use_file = 0;
+  USER_OPTIONS *my_options;
 
-  memset(included_file, 0, sizeof(included_file));
+  my_options = malloc(sizeof(USER_OPTIONS));
+  memset(my_options, 0, sizeof(USER_OPTIONS));
 
   while ((ch = getopt(argc, argv, "a:mvhL")) != -1) {
 
     switch(ch) {
 
     case 'a':
-      strncpy(included_file, optarg, sizeof(included_file) - 1);
-      use_file = 1;
+      if (my_options->numfiles < 32) {
+	my_options->filenames[my_options->numfiles] = malloc(FILENAME_MAX + 1);
+	memset(my_options->filenames[my_options->numfiles], 0, FILENAME_MAX + 1);
+	strncpy(my_options->filenames[my_options->numfiles], optarg, FILENAME_MAX);
+	my_options->numfiles++;
+      } else {
+	fprintf(stderr, "32 files already loaded, ignoring the rest...\n");
+      }
       break;
 
     case 'v':
@@ -64,17 +69,18 @@ main(int argc, char **argv)
       break;
 
     case 'm':
-      maintainer = MAINT_YES;
+      my_options->maint_mode = MAINT_YES;
       break;
 
     case 'L':
       show_categories();
       break;
+
     case '?':
     case 'h':
     default:
       usage();
-
+      /* NOTREACHED */
     }
 
   }
@@ -84,15 +90,7 @@ main(int argc, char **argv)
 
   gtk_init(&argc, &argv);
 
-  if(use_file == 1) {
-
-    create_gtk_ui(included_file, maintainer);
-
-  } else {
-
-    create_gtk_ui(NULL, maintainer);
-
-  }
+  create_gtk_ui(my_options);
 
   return(0);
 
@@ -114,7 +112,7 @@ static void
 about(void)
 {
   printf("gtk-send-pr " GSP_VERSION " " GSP_CODENAME "\n"
-	 "Copyright (c) 2003-2005, Miguel Mendez."
+	 "Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>."
 	 " All rights reserved.\n");
   exit(EXIT_SUCCESS);
 }

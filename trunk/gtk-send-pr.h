@@ -25,11 +25,11 @@
 
 */
 
-#ifndef GTK_SEND_PR_H
-#define GTK_SEND_PR_H
+#ifndef _GTK_SEND_PR_H_
+#define _GTK_SEND_PR_H_
 
-#define GSP_VERSION "0.4.5"
-#define GSP_CODENAME "\"The Power Of Orange Knickers\""
+#define GSP_VERSION "0.4.6"
+#define GSP_CODENAME "\"Buffy Boy\""
 
 #define GSP_SSL_NO 0
 #define GSP_SSL_EN 1
@@ -87,5 +87,14 @@ typedef struct gsp_auth {
 
 #define MAINT_NO 0
 #define MAINT_YES 1
+
+typedef struct user_options {
+
+  int  maint_mode;
+  int  numfiles;
+  /* It's very unlikely that a single PR will need more than 32 files */
+  char *filenames[32];
+
+} USER_OPTIONS;
 
 #endif

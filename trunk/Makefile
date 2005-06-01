@@ -11,11 +11,7 @@ GTK_LDFLAGS!=pkg-config gtk+-2.0 --libs
 ESMTP_LDFLAGS!=libesmtp-config --libs
 LDFLAGS+= ${GTK_LDFLAGS} ${ESMTP_LDFLAGS}
 
-.if defined(WITH_EFENCE)
-LDFLAGS+= -L${LOCALBASE}/lib -lefence
-.endif
-
-OBJECTS= main.o gtk_ui.o user_settings.o smtp.o file.o uname_gather.o
+OBJECTS= main.o gtk_ui.o user_settings.o smtp.o file.o uname_gather.o pr_defs.o
 HEADERS= file.h gtk_ui.h smtp.h gtk-send-pr.h pr_defs.h user_settings.h uname_gather.h
 
 all:	$(OBJECTS)

@@ -25,8 +25,8 @@
 
 */
 
-#ifndef USER_SETTINGS_H
-#define USER_SETTINGS_H
+#ifndef _USER_SETTINGS_H_
+#define _USER_SETTINGS_H_
 
 void save_settings(USER_PROFILE *);
 void load_settings(USER_PROFILE *);

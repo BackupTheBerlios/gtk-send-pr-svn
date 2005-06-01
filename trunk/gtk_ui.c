@@ -58,7 +58,7 @@ extern char *tzname[2];
 extern char global_smtp_error_msg[1024];
 
 static gint delete_event( GtkWidget *, GdkEvent *, gpointer);
-static void destroy( GtkWidget *, gpointer);
+static void destroy(GtkWidget *, gpointer);
 static void quit_pressed(GtkWidget *, gpointer);
 static void about_pressed(GtkWidget *, gpointer);
 static void help_pressed(GtkWidget *, gpointer);
@@ -76,6 +76,8 @@ static int dirty;
 static GtkWidget *window;
 
 static USER_PROFILE my_profile;
+static PR_DEFS *my_pr_defs;
+
 static GtkWidget *type_entry1;
 
 static GtkWidget *email_entry1;
@@ -130,7 +132,7 @@ int gsp_auth_done;
 static GSP_AUTH *auth_info;
 
 int
-create_gtk_ui(char *included_file, int maint_mode)
+create_gtk_ui(USER_OPTIONS *my_options)
 {
 
   GtkWidget *about_icon;
@@ -213,6 +215,8 @@ create_gtk_ui(char *included_file, int maint_mode)
   GdkPixbuf *icon32_pixbuf;
   GdkPixbuf *icon48_pixbuf;
 
+  GtkTextIter end_iter;
+
   GList *icon_list = NULL;
 
   char uname_srm[256];
@@ -247,6 +251,15 @@ create_gtk_ui(char *included_file, int maint_mode)
   load_settings(&my_profile);
   uname_gather(uname_srm, uname_snrvm);
 
+  my_pr_defs = malloc(sizeof(PR_DEFS));
+  memset(my_pr_defs, 0, sizeof(PR_DEFS));
+
+  /*
+   * This will allow us in the future to fetch the PR definitions
+   * from an arbitrary location via the fill_prdefs helper function
+   */
+  fill_prdefs(my_pr_defs);
+
   dirty = 1;
   /* Define main window */
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -269,7 +282,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_window_set_icon(GTK_WINDOW(window), icon64_pixbuf);
   gtk_window_set_default_icon_list(icon_list);
 
-  g_list_free (icon_list);
+  g_list_free(icon_list);
 
   /* Basic buttons */
   send_button = gtk_button_new();
@@ -286,12 +299,11 @@ create_gtk_ui(char *included_file, int maint_mode)
 
   about_button = gtk_button_new();
 
-#if(GTK_MINOR_VERSION>=6)
+#if GTK_CHECK_VERSION(2,6,0)
   about_icon = gtk_image_new_from_stock(GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
 #else
   about_icon = gtk_image_new_from_stock(GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
 #endif
-
 
   about_label = gtk_label_new_with_mnemonic("_About");
   about_hbox = gtk_hbox_new(FALSE, 2);
@@ -360,7 +372,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   email_frame1 = gtk_frame_new(" To ");
   email_entry1 = gtk_entry_new();
   gtk_entry_set_max_length(GTK_ENTRY(email_entry1), 255);
-  gtk_entry_set_text(GTK_ENTRY(email_entry1), default_to);
+  gtk_entry_set_text(GTK_ENTRY(email_entry1), my_pr_defs->default_to);
 
   email_frame2 = gtk_frame_new(" From ");
   email_entry2 = gtk_entry_new();
@@ -379,7 +391,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   email_frame5 = gtk_frame_new(" Submitter-Id ");
   email_entry5 = gtk_entry_new();
   gtk_entry_set_max_length(GTK_ENTRY(email_entry5), 255);
-  gtk_entry_set_text(GTK_ENTRY(email_entry5), default_sub_id);
+  gtk_entry_set_text(GTK_ENTRY(email_entry5), my_pr_defs->default_sub_id);
 
   email_frame6 = gtk_frame_new(" Originator ");
   email_entry6 = gtk_entry_new();
@@ -406,12 +418,12 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_EN);
   gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_RE);
   gtk_combo_box_set_active(GTK_COMBO_BOX(email_ssl_option), my_profile.ssl_mode);
-  
+
   email_hbox1 = gtk_hbox_new(FALSE, 4);
   gtk_box_pack_start(GTK_BOX(email_hbox1), email_entry8, TRUE, TRUE, 4);
   gtk_box_pack_start(GTK_BOX(email_hbox1), email_port_entry, FALSE, FALSE, 4);
   gtk_box_pack_start(GTK_BOX(email_hbox1), email_ssl_option, FALSE, FALSE, 4);
-  
+
   gtk_container_add(GTK_CONTAINER(email_frame1), email_entry1);
   gtk_container_add(GTK_CONTAINER(email_frame2), email_entry2);
   gtk_container_add(GTK_CONTAINER(email_frame3), email_entry3);
@@ -439,7 +451,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_entry_set_max_length(GTK_ENTRY(type_entry1), 255);
 
   /* Maintainer mode */
-  if (maint_mode == MAINT_YES) {
+  if (my_options->maint_mode == MAINT_YES) {
 
     gtk_entry_set_text(GTK_ENTRY(type_entry1), "[Maintainer Update] ");
 
@@ -450,10 +462,10 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox1 = gtk_vbox_new(TRUE, 2);
   type_combo1 = gtk_combo_box_entry_new_text();
 
-  for (i = 0; i < (sizeof(pr_severities)/sizeof(char *)); i++) {
+  for (i = 0; i < my_pr_defs->sev_num; i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo1),
-			      pr_severities[i]);
+			      my_pr_defs->pr_severities[i]);
 
   }
 
@@ -472,10 +484,10 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox2 = gtk_vbox_new(TRUE, 2);
   type_combo2 = gtk_combo_box_entry_new_text();
 
-  for (i = 0; i < (sizeof(pr_priorities)/sizeof(char *)); i++) {
+  for (i = 0; i < my_pr_defs->pri_num; i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo2),
-			      pr_priorities[i]);
+			      my_pr_defs->pr_priorities[i]);
 
   }
 
@@ -490,25 +502,25 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox3 = gtk_vbox_new(TRUE, 2);
   type_combo3 = gtk_combo_box_entry_new_text();
 
-  for (i = 0; i < (sizeof(pr_categories)/sizeof(char *));i++) {
+  for (i = 0; i < my_pr_defs->cat_num; i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo3),
-			      pr_categories[i]);
+			      my_pr_defs->pr_categories[i]);
 
   }
 
-  if (maint_mode == MAINT_YES) {
+  if (my_options->maint_mode == MAINT_YES) {
 
-      for (i = 0; i < (sizeof(pr_categories)/sizeof(char *));i++) {
+    for (i = 0; i < my_pr_defs->cat_num; i++) {
 
-	if (strncmp(pr_categories[i], MAINT_CAT, 255) == 0 ) {
+      if (strncmp(my_pr_defs->pr_categories[i], MAINT_CAT, 255) == 0 ) {
 
-	  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), i);
-	  break;
-
-	}
+	gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), i);
+	break;
 
       }
+
+    }
 
   } else {
 
@@ -526,23 +538,23 @@ create_gtk_ui(char *included_file, int maint_mode)
   type_vbox4 = gtk_vbox_new(TRUE, 2);
   type_combo4 = gtk_combo_box_entry_new_text();
 
-  for ( i = 0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
+  for ( i = 0; i < my_pr_defs->class_num; i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo4),
-			      pr_classes[i]);
+			      my_pr_defs->pr_classes[i]);
 
   }
 
-  if (maint_mode == MAINT_YES) {
+  if (my_options->maint_mode == MAINT_YES) {
 
-    for ( i = 0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
+    for ( i = 0; i < my_pr_defs->class_num; i++) {
 
-	if(strncmp(pr_classes[i], MAINT_CLASS, 255) == 0 ) {
+      if(strncmp(my_pr_defs->pr_classes[i], MAINT_CLASS, 255) == 0 ) {
 
-	  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo4), i);
-	  break;
+	gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo4), i);
+	break;
 
-	}
+      }
 
     }
 
@@ -601,8 +613,8 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window2),
 				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window2)
-		    , details_view1);
+  gtk_container_add(GTK_CONTAINER(scrolled_window2),
+		    details_view1);
 
   details_frame2 = gtk_frame_new(" How-To-Repeat ");
 
@@ -614,8 +626,8 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window3),
 				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window3)
-		    , details_view2);
+  gtk_container_add(GTK_CONTAINER(scrolled_window3),
+		    details_view2);
 
   gtk_container_add(GTK_CONTAINER(details_frame1), scrolled_window2);
   gtk_container_add(GTK_CONTAINER(details_frame2), scrolled_window3);
@@ -637,24 +649,30 @@ create_gtk_ui(char *included_file, int maint_mode)
 		    GDK_ACTION_COPY | GDK_ACTION_MOVE);
   /* XXX - Why do we need GDK_ACTION_MOVE for dnd to work with Konqueror? */
 
- g_signal_connect(fix_view, "drag_data_received",
-		  G_CALLBACK(fix_view_drag_data_received), NULL);
+  g_signal_connect(fix_view, "drag_data_received",
+		   G_CALLBACK(fix_view_drag_data_received), NULL);
 
   fix_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
 
-  if (included_file != NULL) {
+  if (my_options->numfiles > 0) {
 
-    fix_buffer = load_file(included_file);
+    for (i = 0; i<my_options->numfiles; i++) {
 
-    if (fix_buffer != NULL) {
+      fix_buffer = load_file(my_options->filenames[i]);
 
-      gtk_text_buffer_set_text(fix_buffer1, fix_buffer, -1);
-      free(fix_buffer);
-      load_failed = FALSE;
+      if (fix_buffer != NULL) {
 
-    } else {
+	gtk_text_buffer_get_end_iter(fix_buffer1, &end_iter);
+	gtk_text_buffer_insert(fix_buffer1, &end_iter,
+			       fix_buffer, -1);
+	free(fix_buffer);
+	load_failed = FALSE;
 
-      load_failed = TRUE;
+      } else {
+
+	load_failed = TRUE;
+
+      }
 
     }
 
@@ -665,8 +683,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window4),
 				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window4)
-		    , fix_view);
+  gtk_container_add(GTK_CONTAINER(scrolled_window4), fix_view);
 
   gtk_container_add(GTK_CONTAINER(fix_frame), scrolled_window4);
 
@@ -695,7 +712,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_box_pack_start(GTK_BOX(fix_vbox), fix_hbuttons, FALSE, FALSE, 4);
 
   /* Notebook */
-  mynotebook=gtk_notebook_new();
+  mynotebook = gtk_notebook_new();
 
   gtk_notebook_append_page(GTK_NOTEBOOK(mynotebook), email_vbox,tab_email);
   gtk_notebook_append_page(GTK_NOTEBOOK(mynotebook), type_vbox,tab_type);
@@ -714,7 +731,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   /* Show warning message if we couldn't load the file */
   if (load_failed == TRUE) {
 
-    snprintf(file_warning,1024, "Unable to read: %s", included_file);
+    snprintf(file_warning,1024, "One or more files could not be read.");
     file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
 					 GTK_DIALOG_DESTROY_WITH_PARENT,
 					 GTK_MESSAGE_ERROR,
@@ -816,7 +833,7 @@ quit_pressed( GtkWidget *widget, gpointer data)
 static void
 about_pressed( GtkWidget *widget, gpointer data)
 {
-#if(GTK_MINOR_VERSION>=6)
+#if GTK_CHECK_VERSION(2,6,0)
 
   const gchar *authors[] = {
     "Miguel Mendez <flynn@energyhq.es.eu.org>",
@@ -1027,7 +1044,6 @@ fill_pr(PROBLEM_REPORT *mypr)
       temp_cc = strsep(&cc_field, ",");
 
       if (temp_cc != NULL) {
-	
 	mypr->smtp_cc[mypr->smtp_cc_num] = temp_cc;
 	mypr->smtp_cc_num++;
       }
@@ -1041,7 +1057,7 @@ fill_pr(PROBLEM_REPORT *mypr)
   mypr->smtp_from = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
   mypr->smtp_to = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry1));
 
-  mypr->smtp_rcpt = default_rcpt;
+  mypr->smtp_rcpt = my_pr_defs->default_rcpt;
 
   temp_ssl = gtk_combo_box_get_active_text(GTK_COMBO_BOX(email_ssl_option));
 
@@ -1415,47 +1431,5 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   gtk_widget_destroy(auth_window);
 
   gsp_auth_done = TRUE;
-
-}
-
-/* Show available categories */
-void 
-show_categories(void)
-{
-  int i;
-  int len;
-  int written;
-  char my_fmt[16];
-
-  printf("Known categories:\n");
-
-  len = 0;
-
-  for (i = 0; i < (sizeof(pr_categories)/sizeof(char *)); i++) {
-
-    if (strlen(pr_categories[i]) > len ) len = strlen(pr_categories[i]);
-
-  }
-
-  snprintf(my_fmt, sizeof(my_fmt), "%%-%is ", len);
-
-  written = 0;
-
-  for (i = 0; i < (sizeof(pr_categories)/sizeof(char *)); i++) {
-
-    written += printf(my_fmt, pr_categories[i]);
-
-    if (written >= 70 ) {
-
-      written = 0;
-      printf("\n");
-
-    }
-
-  }
-
-  printf("\n");
-
-  exit(EXIT_SUCCESS);
 
 }

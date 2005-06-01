@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -34,6 +34,8 @@
 #include <unistd.h>
 #include <libgen.h>
 
+#include "file.h"
+
 /*
  * This function loads a file into a char * buffer, 
  * and puts a header and a footnote.
@@ -48,21 +50,22 @@ load_file(char *filename)
   char file_head[1024];
   char file_foot[1024];
 
-  fd=open(filename, O_RDONLY, 0);
-  if(fd != -1) {
+  fd = open(filename, O_RDONLY, 0);
+  if (fd != -1) {
 
     i = lseek(fd,0,SEEK_END);
-    fix_buffer = malloc(i+2048);
+    fix_buffer = malloc(i + 2048);
     snprintf(file_head, 1024, "--- %s begins here ---\n", basename(filename));
     snprintf(file_foot, 1024, "--- %s ends here ---\n", basename(filename));
     lseek(fd, 0, SEEK_SET);
     strncpy(fix_buffer, file_head, 1024);
     read(fd, fix_buffer+strlen(file_head), i);
-    if(*(fix_buffer+strlen(file_head)+i-1) != '\n') {
+
+    if (*(fix_buffer + strlen(file_head) + i - 1) != '\n') {
       strcpy(fix_buffer+strlen(file_head)+i, "\n");
       i++;
     }
-    strncpy(fix_buffer+strlen(file_head)+i, file_foot, 1024);
+    strncpy(fix_buffer+strlen(file_head) + i, file_foot, 1024);
     close(fd);
     return fix_buffer;
 
