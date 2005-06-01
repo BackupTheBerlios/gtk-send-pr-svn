@@ -3,9 +3,13 @@
 #
 LOCALBASE?=/usr/local
 
-CFLAGS+= -Wall -g -DGTK_DISABLE_DEPRECATED `pkg-config gtk+-2.0 --cflags` `libesmtp-config --cflags`
+GTK_CFLAGS!=pkg-config gtk+-2.0 --cflags
+ESMTP_CFLAGS!=libesmtp-config --cflags
+CFLAGS+= -Wall -g -DGTK_DISABLE_DEPRECATED ${GTK_CFLAGS} ${ESMTP_CFLAGS}
 
-LDFLAGS+= `pkg-config gtk+-2.0 --libs` `libesmtp-config --libs`
+GTK_LDFLAGS!=pkg-config gtk+-2.0 --libs
+ESMTP_LDFLAGS!=libesmtp-config --libs
+LDFLAGS+= ${GTK_LDFLAGS} ${ESMTP_LDFLAGS}
 
 
 .if defined(WITH_EFENCE)
