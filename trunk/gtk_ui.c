@@ -70,7 +70,8 @@ void select_cancelled(GtkWidget *, gpointer);
 void auth_ok_pressed(GtkWidget *, gpointer);
 void fill_pr(PROBLEM_REPORT *);
 void update_profile(void);
-
+void fix_view_drag_data_received(GtkWidget *, GdkDragContext *, 
+				 gint, gint, GtkSelectionData *, guint, guint);
 extern char *included_file;
 
 int dirty;
@@ -104,6 +105,9 @@ char *env_buffer;
 char *desc_buffer;
 char *how_buffer;
 char *fix_buffer;
+
+/* XXX drag and drop signals are received twice!?!? */
+char drag_dupe[1024];
 
 GtkWidget *auth_window;
 GtkWidget *auth_vbox;
@@ -204,15 +208,30 @@ create_gtk_ui(char *included_file)
   char uname_srm[256];
   char uname_snrvm[1024]; /* better safe than sorry */
   int i;
-  char *fix_buffer=NULL; /* Buffer for the -a option */
+  char *fix_buffer = NULL; /* Buffer for the -a option */
   GtkWidget *file_dialog;
   char file_warning[1024];
 
+  /* Drag and drop support */
+  enum {
+    TARGET_STRING,
+    TARGET_ROOTWIN
+  };
+
+  static GtkTargetEntry target_table[] = {
+    { "STRING",     0, TARGET_STRING },
+    { "text/plain", 0, TARGET_STRING },
+    { "application/x-rootwindow-drop", 0, TARGET_ROOTWIN }
+  };
+
+  static guint n_targets = sizeof(target_table) / sizeof(target_table[0]);
 
   open_menu_up=0;
   gsp_auth_done=FALSE;
 
   /* Let's go */
+
+  memset(drag_dupe, 0, 1024);
 
   load_settings(&my_profile);
   uname_gather(uname_srm, uname_snrvm);
@@ -221,9 +240,9 @@ create_gtk_ui(char *included_file)
   /* Define main window */
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-  gtk_window_set_resizable(GTK_WINDOW(window),TRUE);
+  gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
   gtk_window_set_title(GTK_WINDOW(window), "GTK Send-PR " GSP_VERSION);
-  gtk_window_set_default_size(GTK_WINDOW(window),my_profile.geom_x,my_profile.geom_y);
+  gtk_window_set_default_size(GTK_WINDOW(window), my_profile.geom_x, my_profile.geom_y);
 
   /* Set the icon */
   icon16_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug16);
@@ -244,7 +263,7 @@ create_gtk_ui(char *included_file)
   /* Basic buttons */
   send_button = gtk_button_new();
   send_icon = gtk_image_new_from_stock(GTK_STOCK_APPLY, GTK_ICON_SIZE_MENU);
-  send_label = gtk_label_new("Send");
+  send_label = gtk_label_new_with_mnemonic("_Send");
   send_hbox = gtk_hbox_new(FALSE, 2);
   send_align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
   gtk_box_pack_start(GTK_BOX(send_hbox), send_icon, FALSE, FALSE, 0);
@@ -256,7 +275,7 @@ create_gtk_ui(char *included_file)
 
   about_button = gtk_button_new();
   about_icon = gtk_image_new_from_stock(GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
-  about_label = gtk_label_new("About");
+  about_label = gtk_label_new_with_mnemonic("_About");
   about_hbox = gtk_hbox_new(FALSE, 2);
   about_align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
   gtk_box_pack_start(GTK_BOX(about_hbox), about_icon, FALSE, FALSE, 0);
@@ -268,19 +287,19 @@ create_gtk_ui(char *included_file)
 
   /* Button tooltips */
   send_tip=gtk_tooltips_new();
-  gtk_tooltips_set_tip(send_tip,send_button,"Send problem report","");
+  gtk_tooltips_set_tip(send_tip,send_button, "Send problem report", "");
   gtk_tooltips_enable(send_tip);
 
   help_tip=gtk_tooltips_new();
-  gtk_tooltips_set_tip(help_tip,help_button,"Show online help","");
+  gtk_tooltips_set_tip(help_tip,help_button, "Show online help", "");
   gtk_tooltips_enable(help_tip);
 
   about_tip=gtk_tooltips_new();
-  gtk_tooltips_set_tip(about_tip,about_button,"About this program","");
+  gtk_tooltips_set_tip(about_tip,about_button, "About this program", "");
   gtk_tooltips_enable(about_tip);
 
   quit_tip=gtk_tooltips_new();
-  gtk_tooltips_set_tip(quit_tip,quit_button,"Exit this program","");
+  gtk_tooltips_set_tip(quit_tip,quit_button, "Exit this program", "");
   gtk_tooltips_enable(quit_tip);
 
   h_buttons=gtk_hbutton_box_new();
@@ -388,7 +407,9 @@ create_gtk_ui(char *included_file)
   type_frame2=gtk_frame_new(" Severity ");
 
   for(i=0;i<(sizeof(pr_severities)/sizeof(char *));i++) {
+
     type_items1 = g_list_append (type_items1, pr_severities[i]);
+
   }
 
   type_combo1 = gtk_combo_new();
@@ -402,8 +423,11 @@ create_gtk_ui(char *included_file)
 
   /* Priority */
   type_frame3=gtk_frame_new(" Priority ");
+
   for(i=0;i<(sizeof(pr_priorities)/sizeof(char *));i++) {
+
     type_items2 = g_list_append (type_items2, pr_priorities[i]);
+
   }
 
   type_combo2 = gtk_combo_new();
@@ -414,9 +438,13 @@ create_gtk_ui(char *included_file)
 
   /* Category */
   type_frame4=gtk_frame_new(" Category ");
+
   for(i=0;i<(sizeof(pr_categories)/sizeof(char *));i++) {
+
     type_items3 = g_list_append (type_items3, pr_categories[i]);
+
   }
+
   type_combo3 = gtk_combo_new();
   gtk_combo_set_popdown_strings(GTK_COMBO (type_combo3), type_items3);
 
@@ -425,8 +453,11 @@ create_gtk_ui(char *included_file)
 
   /* Class */
   type_frame5=gtk_frame_new(" Class ");
+
   for(i=0;i<(sizeof(pr_classes)/sizeof(char *));i++) {
+
     type_items4 = g_list_append (type_items4, pr_classes[i]);
+
   }	
 
   type_combo4 = gtk_combo_new();
@@ -449,16 +480,16 @@ create_gtk_ui(char *included_file)
   system_frame2=gtk_frame_new(" Environment ");
 
   system_view1 = gtk_text_view_new();
-  gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(system_view1),GTK_WRAP_CHAR);
+  gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(system_view1), GTK_WRAP_CHAR);
   system_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(system_view1));
   gtk_text_buffer_set_text(system_buffer1, uname_snrvm, -1);
 
   scrolled_window1=gtk_scrolled_window_new(NULL, NULL);
-  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window1),10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window1),
+  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window1), 10);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window1),
 				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window1)
-					,system_view1);
+					, system_view1);
 
   gtk_container_add(GTK_CONTAINER (system_frame1), system_entry1);
   gtk_container_add(GTK_CONTAINER (system_frame2), scrolled_window1);
@@ -474,11 +505,11 @@ create_gtk_ui(char *included_file)
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(details_view1), GTK_WRAP_CHAR);
 
   scrolled_window2=gtk_scrolled_window_new(NULL, NULL);
-  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window2),10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window2),
+  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window2), 10);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window2),
 				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window2)
-					,details_view1);
+					, details_view1);
 
   details_frame2=gtk_frame_new(" How-To-Repeat ");
 
@@ -486,11 +517,11 @@ create_gtk_ui(char *included_file)
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(details_view2), GTK_WRAP_CHAR);
 
   scrolled_window3=gtk_scrolled_window_new(NULL, NULL);
-  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window3),10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window3),
+  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window3), 10);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window3),
 				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window3)
-					,details_view2);
+					, details_view2);
 
   gtk_container_add(GTK_CONTAINER(details_frame1), scrolled_window2);
   gtk_container_add(GTK_CONTAINER(details_frame2), scrolled_window3);
@@ -500,16 +531,26 @@ create_gtk_ui(char *included_file)
 
   /* Fix */
   fix_vbox = gtk_vbox_new (FALSE, 2);
-  fix_frame=gtk_frame_new(" Fix ");
+  fix_frame=gtk_frame_new(" Fix (You can drag and drop text files here)");
 
   fix_view = gtk_text_view_new ();
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(fix_view), GTK_WRAP_CHAR);
+
+  /* Drag and drop support */
+  gtk_drag_dest_set(fix_view,
+		    GTK_DEST_DEFAULT_ALL,
+		    target_table, n_targets - 1, /* no rootwin */
+		    GDK_ACTION_COPY | GDK_ACTION_MOVE);
+
+  g_signal_connect (fix_view, "drag_data_received",
+                    G_CALLBACK( fix_view_drag_data_received), NULL);
 
   fix_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
 
   if(included_file!=NULL) {
 
     fix_buffer=load_file(included_file);
+
     if(fix_buffer!=NULL) {
 
       gtk_text_buffer_set_text(fix_buffer1, fix_buffer, -1);
@@ -530,16 +571,16 @@ create_gtk_ui(char *included_file)
 
   }
 
-  scrolled_window4=gtk_scrolled_window_new(NULL, NULL);
-  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window4),10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window4),
+  scrolled_window4 = gtk_scrolled_window_new(NULL, NULL);
+  gtk_container_set_border_width(GTK_CONTAINER(scrolled_window4), 10);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window4),
 				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window4)
-					,fix_view);
+					, fix_view);
 
   gtk_container_add(GTK_CONTAINER(fix_frame), scrolled_window4);
 
-  fix_hbuttons=gtk_hbutton_box_new();
+  fix_hbuttons = gtk_hbutton_box_new();
 
   fix_button1 = gtk_button_new_from_stock(GTK_STOCK_OPEN);
   fix_tip1=gtk_tooltips_new();
@@ -729,13 +770,13 @@ quit_pressed( GtkWidget *widget, gpointer data)
 
   if(dirty>0) {
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-				     GTK_DIALOG_DESTROY_WITH_PARENT,
-				     GTK_MESSAGE_WARNING,
-				     GTK_BUTTONS_YES_NO,
-				     "Report not sent yet, quit anyway?");
-    result=gtk_dialog_run (GTK_DIALOG (dialog));
-    gtk_widget_destroy (dialog);    
+    dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				    GTK_DIALOG_DESTROY_WITH_PARENT,
+				    GTK_MESSAGE_WARNING,
+				    GTK_BUTTONS_YES_NO,
+				    "Report not sent yet, quit anyway?");
+    result=gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);    
 
     if(result==GTK_RESPONSE_YES) {
 
@@ -762,18 +803,18 @@ about_pressed( GtkWidget *widget, gpointer data)
 
   GtkWidget *dialog;
 
-  dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-				   GTK_DIALOG_DESTROY_WITH_PARENT,
-				   GTK_MESSAGE_INFO,
-				   GTK_BUTTONS_OK,
-				   "gtk-send-pr "
-				   GSP_VERSION " "
-				   GSP_CODENAME
-				   "\nCopyright (c) 2003-2004, "
-				   "Miguel Mendez\nE-Mail: <flynn@energyhq.es.eu.org>\n"
-				   "http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
-  gtk_dialog_run (GTK_DIALOG (dialog));
-  gtk_widget_destroy (dialog);
+  dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				  GTK_DIALOG_DESTROY_WITH_PARENT,
+				  GTK_MESSAGE_INFO,
+				  GTK_BUTTONS_OK,
+				  "gtk-send-pr "
+				  GSP_VERSION " "
+				  GSP_CODENAME
+				  "\nCopyright (c) 2003-2004, "
+				  "Miguel Mendez\nE-Mail: <flynn@energyhq.es.eu.org>\n"
+				  "http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
+  gtk_dialog_run(GTK_DIALOG(dialog));
+  gtk_widget_destroy(dialog);
 
 }
 
@@ -783,14 +824,14 @@ help_pressed( GtkWidget *widget, gpointer data)
 
   GtkWidget *dialog;
 
-  dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-				   GTK_DIALOG_DESTROY_WITH_PARENT,
-				   GTK_MESSAGE_INFO,
-				   GTK_BUTTONS_OK,
-				   "Please, read the gtk-send-pr man page \n"
-				   "for info on using this program.\n");
-  gtk_dialog_run (GTK_DIALOG (dialog));
-  gtk_widget_destroy (dialog);
+  dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				  GTK_DIALOG_DESTROY_WITH_PARENT,
+				  GTK_MESSAGE_INFO,
+				  GTK_BUTTONS_OK,
+				  "Please, read the gtk-send-pr man page \n"
+				  "for info on using this program.\n");
+  gtk_dialog_run(GTK_DIALOG(dialog));
+  gtk_widget_destroy(dialog);
 
 }
 
@@ -809,24 +850,24 @@ send_pressed( GtkWidget *widget, gpointer data)
   if(retcode==0) {
 
     dirty=0;
-    gtk_widget_set_sensitive(send_button,FALSE);
-    dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-				     GTK_DIALOG_DESTROY_WITH_PARENT,
-				     GTK_MESSAGE_INFO,
-				     GTK_BUTTONS_OK,
-				     "Problem report sent, thanks.\n");
-    gtk_dialog_run (GTK_DIALOG (dialog));
-    gtk_widget_destroy (dialog);
+    gtk_widget_set_sensitive(send_button, FALSE);
+    dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				    GTK_DIALOG_DESTROY_WITH_PARENT,
+				    GTK_MESSAGE_INFO,
+				    GTK_BUTTONS_OK,
+				    "Problem report sent, thanks.\n");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
 
   } else {
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-				     GTK_DIALOG_DESTROY_WITH_PARENT,
-				     GTK_MESSAGE_ERROR,
-				     GTK_BUTTONS_OK,
-				     global_smtp_error_msg);
-    gtk_dialog_run (GTK_DIALOG (dialog));
-    gtk_widget_destroy (dialog);	
+    dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				    GTK_DIALOG_DESTROY_WITH_PARENT,
+				    GTK_MESSAGE_ERROR,
+				    GTK_BUTTONS_OK,
+				    global_smtp_error_msg);
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);	
 
   }
 
@@ -838,30 +879,30 @@ open_pressed( GtkWidget *widget, gpointer data)
   if(open_menu_up==0) {
 
     fix_filsel=gtk_file_selection_new("Select file to be included the Fix field");
-    g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (fix_filsel)->ok_button),
-		      "clicked",
-		      G_CALLBACK (select_ok),
-		      (gpointer) fix_filsel);
+    g_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)->ok_button),
+		     "clicked",
+		     G_CALLBACK(select_ok),
+		     (gpointer) fix_filsel);
 
-    g_signal_connect(GTK_OBJECT (GTK_FILE_SELECTION (fix_filsel)),
+    g_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)),
 		     "delete_event",
 		     GTK_SIGNAL_FUNC(select_cancelled), 
 		     NULL);
 
-    g_signal_connect(GTK_OBJECT (GTK_FILE_SELECTION (fix_filsel)),
+    g_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)),
 		     "destroy",
 		     GTK_SIGNAL_FUNC(select_cancelled), 
 		     NULL);
 
-    g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (fix_filsel)->ok_button),
-			      "clicked",
-			      G_CALLBACK (select_cancelled), 
-			      (gpointer) fix_filsel); 
+    g_signal_connect_swapped(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)->ok_button),
+			     "clicked",
+			     G_CALLBACK(select_cancelled), 
+			     (gpointer) fix_filsel); 
 
-    g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (fix_filsel)->cancel_button),
-			      "clicked",
-			      G_CALLBACK (select_cancelled),
-			      (gpointer) fix_filsel); 
+    g_signal_connect_swapped(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)->cancel_button),
+			     "clicked",
+			     G_CALLBACK(select_cancelled),
+			     (gpointer) fix_filsel); 
 
     gtk_widget_show(fix_filsel);
 
@@ -874,7 +915,11 @@ clear_fix_pressed( GtkWidget *widget, gpointer data)
 {
 
   gtk_text_buffer_set_text(fix_buffer1, "", 0);
-
+  /*
+   * Let the user drag and drop the same file again
+   * if she wants to.
+   */
+  memset(drag_dupe, 0, 1024);
 }
 
 void
@@ -900,13 +945,13 @@ select_ok( GtkWidget *widget, gpointer data)
   } else {
 
     snprintf(file_warning,1024,"Unable to read: %s",selected_filename);
-    file_dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-					  GTK_DIALOG_DESTROY_WITH_PARENT,
-					  GTK_MESSAGE_ERROR,
-					  GTK_BUTTONS_OK,
-					  file_warning);
-    gtk_dialog_run (GTK_DIALOG (file_dialog));
-    gtk_widget_destroy (file_dialog);
+    file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+					 GTK_DIALOG_DESTROY_WITH_PARENT,
+					 GTK_MESSAGE_ERROR,
+					 GTK_BUTTONS_OK,
+					 file_warning);
+    gtk_dialog_run(GTK_DIALOG(file_dialog));
+    gtk_widget_destroy(file_dialog);
 
   }
 }
@@ -937,10 +982,13 @@ void fill_pr(PROBLEM_REPORT *mypr)
 
   mypr->smtp_cc_text=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
   cc_field=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
+
   if(strlen(mypr->smtp_cc_text)>0) {
 
     do {
+
       temp_cc=strsep(&cc_field,",");
+
       if(temp_cc!=NULL) {
 	
 	mypr->smtp_cc[mypr->smtp_cc_num]=temp_cc;
@@ -1078,7 +1126,7 @@ update_profile(void)
   char *tmp_entry;
 
 
-  gtk_window_get_size(GTK_WINDOW(window),&newsize[0],&newsize[1]);
+  gtk_window_get_size(GTK_WINDOW(window), &newsize[0], &newsize[1]);
 
   my_profile.geom_x=newsize[0];
   my_profile.geom_y=newsize[1];
@@ -1094,6 +1142,93 @@ update_profile(void)
 
   tmp_entry=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
   strncpy(my_profile.smtp,tmp_entry,255);
+
+}
+
+void  
+fix_view_drag_data_received(GtkWidget          *widget,
+			    GdkDragContext     *context,
+			    gint                x,
+			    gint                y,
+			    GtkSelectionData   *data,
+			    guint               info,
+			    guint               time)
+{
+
+  char file_buffer[1024];
+  char *file_temp;
+  GtkWidget *file_dialog;
+  char file_warning[1024];
+  char c;
+  int i;
+
+  memset(file_buffer, 0, 1024);
+
+  if ((data->length >= 0) && (data->format == 8))
+    {
+
+#ifdef DEBUG_DND
+      printf("Received \"%s\" in fix_view\n", data->data);
+#endif
+
+      file_temp = data->data;
+
+      if(strncmp(drag_dupe, file_temp, 1024) == 0) {
+
+#ifdef DEBUG_DND
+	printf("Got duplicated drop [%s]\n", drag_dupe);
+#endif
+
+	gtk_drag_finish(context, TRUE, FALSE, time);
+	return;
+
+      } else {
+
+	strncpy(drag_dupe, file_temp, 1024);
+
+      }
+
+      if(strncmp(file_temp, "file:", strlen("file:")) == 0 ) {
+
+	strncpy(file_buffer, file_temp + strlen("file:"), 1024);
+
+	for(i=0; i<1024; i++) {
+
+	  if(file_buffer[i] == '\n'|| file_buffer[i] == '\r') file_buffer[i]='\0';
+
+	}
+
+	printf("Valer: {%s}\n", file_buffer);
+	fix_buffer=load_file(file_buffer);
+
+	if(fix_buffer!=NULL) {
+
+	  gtk_text_buffer_insert_at_cursor(fix_buffer1, fix_buffer, -1);
+	  free(fix_buffer);
+
+	} else {
+
+	  snprintf(file_warning,1024,"Unable to read: %s",file_buffer);
+	  file_dialog = gtk_message_dialog_new (GTK_WINDOW(window),
+						GTK_DIALOG_DESTROY_WITH_PARENT,
+						GTK_MESSAGE_ERROR,
+						GTK_BUTTONS_OK,
+						file_warning);
+
+	  gtk_dialog_run (GTK_DIALOG (file_dialog));
+	  gtk_widget_destroy (file_dialog);
+
+	}
+
+      } 
+
+
+      gtk_drag_finish(context, TRUE, FALSE, time);
+      return;
+
+    }
+  
+  gtk_drag_finish(context, FALSE, FALSE, time);
 
 }
 
