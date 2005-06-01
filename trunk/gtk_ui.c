@@ -1159,7 +1159,6 @@ fix_view_drag_data_received(GtkWidget          *widget,
   char *file_temp;
   GtkWidget *file_dialog;
   char file_warning[1024];
-  char c;
   int i;
 
   memset(file_buffer, 0, 1024);
