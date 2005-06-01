@@ -40,8 +40,8 @@
 #include "user_settings.h"
 
 /* Avoid saving prefs every time */
-int migration;
-USER_PROFILE old_profile;
+static int migration;
+static USER_PROFILE old_profile;
 
 void 
 save_settings(USER_PROFILE *my_profile)
@@ -202,6 +202,8 @@ load_settings(USER_PROFILE *my_profile)
       strncpy(my_profile->email, pr_user->pw_name, 255);
       sprintf(my_profile->org, " ");
       sprintf(my_profile->smtp, "FILL THIS!!!");
+      sprintf(my_profile->smtp_port, "25");
+
     }
 		
   } else {

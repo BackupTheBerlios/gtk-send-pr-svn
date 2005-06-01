@@ -50,11 +50,11 @@ extern char *tzname[2];
 #endif
 
 
-void build_message(FILE *, PROBLEM_REPORT *);
-int authinteract(auth_client_request_t request, char **result, int fields, void *arg);
+static void build_message(FILE *, PROBLEM_REPORT *);
+static int authinteract(auth_client_request_t request, char **result, int fields, void *arg);
 
 char global_smtp_error_msg[1024];
-GSP_AUTH *my_auth = NULL;
+static GSP_AUTH *my_auth = NULL;
 
 extern int gsp_auth_done;
 	
@@ -187,8 +187,8 @@ send_pr(PROBLEM_REPORT *mypr)
 
 }
 
-void 
-build_message(FILE *fp,PROBLEM_REPORT *mypr)
+static void
+build_message(FILE *fp, PROBLEM_REPORT *mypr)
 {
 
   fprintf(fp,"Return-Path: <%s>\r\n", mypr->smtp_from);
@@ -233,8 +233,9 @@ build_message(FILE *fp,PROBLEM_REPORT *mypr)
 
 }
 
-int 
-authinteract(auth_client_request_t request, char **result, int fields, void *arg)
+static int
+authinteract(auth_client_request_t request, 
+	     char **result, int fields, void *arg)
 {
   int i;
 

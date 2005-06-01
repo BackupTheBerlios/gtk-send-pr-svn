@@ -57,72 +57,77 @@ extern char *tzname[2];
 
 extern char global_smtp_error_msg[1024];
 
-gint delete_event( GtkWidget *, GdkEvent *, gpointer);
-void destroy( GtkWidget *, gpointer);
-void quit_pressed(GtkWidget *, gpointer);
-void about_pressed(GtkWidget *, gpointer);
-void help_pressed(GtkWidget *, gpointer);
-void send_pressed(GtkWidget *, gpointer);
-void open_pressed(GtkWidget *, gpointer);
-void clear_fix_pressed(GtkWidget *, gpointer);
+static gint delete_event( GtkWidget *, GdkEvent *, gpointer);
+static void destroy( GtkWidget *, gpointer);
+static void quit_pressed(GtkWidget *, gpointer);
+static void about_pressed(GtkWidget *, gpointer);
+static void help_pressed(GtkWidget *, gpointer);
+static void send_pressed(GtkWidget *, gpointer);
+static void open_pressed(GtkWidget *, gpointer);
+static void clear_fix_pressed(GtkWidget *, gpointer);
 
-void auth_ok_pressed(GtkWidget *, gpointer);
-void fill_pr(PROBLEM_REPORT *);
-void update_profile(void);
-void fix_view_drag_data_received(GtkWidget *, GdkDragContext *, 
-				 gint, gint, GtkSelectionData *, guint, guint);
-extern char *included_file;
+static void auth_ok_pressed(GtkWidget *, gpointer);
+static void fill_pr(PROBLEM_REPORT *);
+static void update_profile(void);
+static void fix_view_drag_data_received(GtkWidget *, GdkDragContext *, 
+					gint, gint, GtkSelectionData *, guint, guint);
+/* extern char *included_file; */
 
-int dirty;
-GtkWidget *window;
-struct passwd *my_user;
+static int dirty;
+static GtkWidget *window;
+/*  static struct passwd *my_user; */
 
-USER_PROFILE my_profile;
-GtkWidget *type_entry1;
+static USER_PROFILE my_profile;
+static GtkWidget *type_entry1;
 
-GtkWidget *email_entry1;
-GtkWidget *email_entry2;
-GtkWidget *email_entry4;
-GtkWidget *email_entry5;
-GtkWidget *email_entry6;
-GtkWidget *email_entry7;
-GtkWidget *email_entry8;
-GtkWidget *email_port_entry;
-GtkWidget *type_combo1;
-GtkWidget *type_combo2;
-GtkWidget *type_combo3;
-GtkWidget *type_combo4;
-GtkWidget *system_entry1;
-GtkWidget *system_view1;
-GtkWidget *details_view1;
-GtkWidget *details_view2;
-GtkWidget *fix_view;
-GtkWidget *fix_filsel;
-GtkTextBuffer *fix_buffer1;
-GtkWidget *send_button;
+static GtkWidget *email_entry1;
+static GtkWidget *email_entry2;
+static GtkWidget *email_entry4;
+static GtkWidget *email_entry5;
+static GtkWidget *email_entry6;
+static GtkWidget *email_entry7;
+static GtkWidget *email_entry8;
+static GtkWidget *email_port_entry;
+static GtkWidget *type_combo1;
+static GtkWidget *type_combo2;
+static GtkWidget *type_combo3;
+static GtkWidget *type_combo4;
+static GtkWidget *system_entry1;
+static GtkWidget *system_view1;
+static GtkWidget *details_view1;
+static GtkWidget *details_view2;
+static GtkWidget *fix_view;
 
-char *env_buffer;
-char *desc_buffer;
-char *how_buffer;
-char *fix_buffer;
+/* static GtkWidget *fix_filsel; */
+
+static GtkTextBuffer *fix_buffer1;
+static GtkWidget *send_button;
+
+static char *env_buffer;
+static char *desc_buffer;
+static char *how_buffer;
+static char *fix_buffer;
 
 /* XXX drag and drop signals are received twice!?!? */
-char drag_dupe[1024];
+static char drag_dupe[1024];
 
-GtkWidget *auth_window;
-GtkWidget *auth_vbox;
-GtkWidget *auth_label;
-GtkWidget *auth_userframe;
-GtkWidget *auth_passframe;
-GtkWidget *auth_ok;
-GtkWidget *auth_cancel;
-GtkWidget *auth_userentry;
-GtkWidget *auth_passentry;
-int open_menu_up;
+static GtkWidget *auth_window;
+static GtkWidget *auth_vbox;
+static GtkWidget *auth_label;
+static GtkWidget *auth_userframe;
+static GtkWidget *auth_passframe;
+static GtkWidget *auth_ok;
+
+/*  static GtkWidget *auth_cancel; */
+
+static GtkWidget *auth_userentry;
+static GtkWidget *auth_passentry;
+static int open_menu_up;
+
 int gsp_auth_done;
-GSP_AUTH *auth_info;
+static GSP_AUTH *auth_info;
 
-int 
+int
 create_gtk_ui(char *included_file)
 {
 
@@ -514,8 +519,6 @@ create_gtk_ui(char *included_file)
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window1), 10);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window1),
 				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-  //  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window1)
-  //				, system_view1);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window1)
 		    , system_view1);
@@ -537,8 +540,6 @@ create_gtk_ui(char *included_file)
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window2), 10);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window2),
 				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-  //  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window2)
-  //				, details_view1);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window2)
 		    , details_view1);
@@ -552,8 +553,6 @@ create_gtk_ui(char *included_file)
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window3), 10);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window3),
 				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-/*   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window3) */
-/* 					, details_view2); */
 
   gtk_container_add(GTK_CONTAINER(scrolled_window3)
 		    , details_view2);
@@ -611,9 +610,6 @@ create_gtk_ui(char *included_file)
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window4),
 				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 
-/*   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window4) */
-/* 					, fix_view); */
-
   gtk_container_add(GTK_CONTAINER(scrolled_window4)
 		    , fix_view);
 
@@ -669,7 +665,7 @@ create_gtk_ui(char *included_file)
 
 /* CALLBACKS */
 
-gint 
+static gint
 delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
 {
 
@@ -706,7 +702,7 @@ delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
 
 }
 
-void 
+static void
 destroy( GtkWidget *widget, gpointer data)
 {
   update_profile();
@@ -714,7 +710,7 @@ destroy( GtkWidget *widget, gpointer data)
   gtk_main_quit();
 }
 
-void 
+static void
 quit_pressed( GtkWidget *widget, gpointer data)
 {
   GtkWidget *dialog;
@@ -748,8 +744,7 @@ quit_pressed( GtkWidget *widget, gpointer data)
         
 }
 
-
-void 
+static void
 about_pressed( GtkWidget *widget, gpointer data)
 {
 
@@ -770,7 +765,7 @@ about_pressed( GtkWidget *widget, gpointer data)
 
 }
 
-void 
+static void
 help_pressed( GtkWidget *widget, gpointer data)
 {
 
@@ -787,7 +782,7 @@ help_pressed( GtkWidget *widget, gpointer data)
 
 }
 
-void 
+static void
 send_pressed( GtkWidget *widget, gpointer data)
 {
   int retcode;
@@ -825,7 +820,7 @@ send_pressed( GtkWidget *widget, gpointer data)
 
 }
 
-void 
+static void
 open_pressed( GtkWidget *widget, gpointer data)
 {
   GtkWidget *file_dialog;
@@ -872,7 +867,7 @@ open_pressed( GtkWidget *widget, gpointer data)
 
 }
 
-void 
+static void
 clear_fix_pressed( GtkWidget *widget, gpointer data)
 {
 
@@ -884,7 +879,8 @@ clear_fix_pressed( GtkWidget *widget, gpointer data)
   memset(drag_dupe, 0, 1024);
 }
 
-void fill_pr(PROBLEM_REPORT *mypr)
+static void
+fill_pr(PROBLEM_REPORT *mypr)
 {
 
   char *ctmp;
@@ -1069,7 +1065,7 @@ void fill_pr(PROBLEM_REPORT *mypr)
 
 }
 
-void 
+static void
 update_profile(void)
 {
   int newsize[2];
@@ -1098,7 +1094,7 @@ update_profile(void)
 
 }
 
-void  
+static void
 fix_view_drag_data_received(GtkWidget          *widget,
 			    GdkDragContext     *context,
 			    gint                x,
@@ -1248,7 +1244,7 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 
 }
 
-void 
+static void
 auth_ok_pressed( GtkWidget *widget, gpointer data)
 {
 

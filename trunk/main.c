@@ -35,7 +35,7 @@
 #include "gtk-send-pr.h"
 #include "gtk_ui.h"
 
-void usage(void);
+static void usage(void);
 
 int
 main(int argc, char **argv)
