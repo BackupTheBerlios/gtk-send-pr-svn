@@ -925,16 +925,19 @@ void fill_pr(PROBLEM_REPORT *mypr)
 
   mypr->smtp_cc_text=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
   cc_field=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
+  if(strlen(mypr->smtp_cc_text)>0) {
 
-  do {
-    temp_cc=strsep(&cc_field,",");
-    if(temp_cc!=NULL) {
+    do {
+      temp_cc=strsep(&cc_field,",");
+      if(temp_cc!=NULL) {
 	
-      mypr->smtp_cc[mypr->smtp_cc_num]=temp_cc;
-      mypr->smtp_cc_num++;
-    }
+	mypr->smtp_cc[mypr->smtp_cc_num]=temp_cc;
+	mypr->smtp_cc_num++;
+      }
 
-  } while(temp_cc!=NULL);
+    } while(temp_cc!=NULL);
+
+  }
 
   mypr->smtp_server=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
   mypr->smtp_from=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
