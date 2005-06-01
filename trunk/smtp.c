@@ -132,10 +132,12 @@ void
 build_message(FILE *fp,PROBLEM_REPORT *mypr,struct utsname *my_uname)
 {
 
+  srandomdev();
+
   fprintf(fp,"Return-Path: <%s>\r\n",mypr->smtp_from);
   fprintf(fp,"Subject: %s\r\n", mypr->smtp_subject);
   fprintf(fp,"MIME-Version: 1.0\r\n");
-  fprintf(fp,"Message-Id: <%i@%s>\r\n",(int) time(NULL),my_uname->nodename);
+  fprintf(fp,"Message-Id: <%i.%lx@%s>\r\n",(int) time(NULL),random(),my_uname->nodename);
   fprintf(fp,"Content-Type: text/plain;\r\n");
   fprintf(fp,"  charset=iso-8859-1\r\n");
   fprintf(fp,"Content-Transfer-Encoding: 7bit\r\n");
