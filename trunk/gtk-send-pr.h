@@ -88,12 +88,17 @@ typedef struct gsp_auth {
 #define MAINT_NO 0
 #define MAINT_YES 1
 
+struct file_element {
+
+  char *filename;
+  struct file_element *next;
+
+};
+
 typedef struct user_options {
 
   int  maint_mode;
-  int  numfiles;
-  /* It's very unlikely that a single PR will need more than 32 files */
-  char *filenames[32];
+  struct file_element *head;
 
 } USER_OPTIONS;
 

@@ -55,6 +55,9 @@ extern char *tzname[2];
 #include "ladybird48.xpm"
 #include "ladybird64.xpm"
 
+/* Special EPIII edition... */
+#include "empire-logo.xpm"
+
 extern char global_smtp_error_msg[1024];
 
 static gint delete_event( GtkWidget *, GdkEvent *, gpointer);
@@ -226,6 +229,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
   GtkWidget *file_dialog;
   char file_warning[1024];
   int load_failed = FALSE;
+  struct file_element *current;
 
   /* Drag and drop support */
   enum
@@ -272,7 +276,10 @@ create_gtk_ui(USER_OPTIONS *my_options)
   icon16_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird16);
   icon32_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird32);
   icon48_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird48);
-  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird64);
+
+  //  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird64);
+
+  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)empirelogo);
 
   g_list_append(icon_list, icon16_pixbuf);
   g_list_append(icon_list, icon32_pixbuf);
@@ -654,29 +661,32 @@ create_gtk_ui(USER_OPTIONS *my_options)
 
   fix_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
 
-  if (my_options->numfiles > 0) {
+  current = my_options->head;
 
-    for (i = 0; i<my_options->numfiles; i++) {
+  /* Traverse linked list and load each file */
+  while(current->filename != NULL) {
 
-      fix_buffer = load_file(my_options->filenames[i]);
+    fix_buffer = load_file(current->filename);
 
-      if (fix_buffer != NULL) {
+    if (fix_buffer != NULL) {
 
-	gtk_text_buffer_get_end_iter(fix_buffer1, &end_iter);
-	gtk_text_buffer_insert(fix_buffer1, &end_iter,
-			       fix_buffer, -1);
-	free(fix_buffer);
-	load_failed = FALSE;
+      gtk_text_buffer_get_end_iter(fix_buffer1, &end_iter);
+      gtk_text_buffer_insert(fix_buffer1, &end_iter,
+			     fix_buffer, -1);
+      free(fix_buffer);
+      load_failed = FALSE;
 
-      } else {
+    } else {
 
-	load_failed = TRUE;
-
-      }
+      load_failed = TRUE;
 
     }
 
+    current = current->next;
+
   }
+
+
 
   scrolled_window4 = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window4), 10);
@@ -1400,10 +1410,10 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
   g_signal_connect(GTK_OBJECT(auth_ok), "clicked",
 		   G_CALLBACK(auth_ok_pressed), NULL);
 
-  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_label, FALSE, FALSE, 4);
-  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_userframe, FALSE, FALSE, 4);
-  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_passframe, FALSE, FALSE, 4);
-  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_ok, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(auth_vbox), auth_label, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(auth_vbox), auth_userframe, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(auth_vbox), auth_passframe, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(auth_vbox), auth_ok, FALSE, FALSE, 4);
 
   gtk_box_set_homogeneous(GTK_BOX(auth_vbox), FALSE);
   gtk_container_add(GTK_CONTAINER(auth_window), auth_vbox);
@@ -1425,8 +1435,10 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
 {
 
   /* Keep a copy before destroying the widgets */
-  strncpy(auth_info->username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)), 1023);
-  strncpy(auth_info->password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)), 1023);
+  strncpy(auth_info->username, 
+	  (char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)), 1023);
+  strncpy(auth_info->password, 
+	  (char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)), 1023);
 
   gtk_widget_destroy(auth_window);
 

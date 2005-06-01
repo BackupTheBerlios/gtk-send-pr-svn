@@ -45,23 +45,25 @@ main(int argc, char **argv)
 {
   int ch;
   USER_OPTIONS *my_options;
+  struct file_element *current;
 
   my_options = malloc(sizeof(USER_OPTIONS));
   memset(my_options, 0, sizeof(USER_OPTIONS));
+  my_options->head = malloc(sizeof(struct file_element));
+  memset(my_options->head, 0, sizeof(struct file_element));
+  current = my_options->head;
 
   while ((ch = getopt(argc, argv, "a:mvhL")) != -1) {
 
     switch(ch) {
 
     case 'a':
-      if (my_options->numfiles < 32) {
-	my_options->filenames[my_options->numfiles] = malloc(FILENAME_MAX + 1);
-	memset(my_options->filenames[my_options->numfiles], 0, FILENAME_MAX + 1);
-	strncpy(my_options->filenames[my_options->numfiles], optarg, FILENAME_MAX);
-	my_options->numfiles++;
-      } else {
-	fprintf(stderr, "32 files already loaded, ignoring the rest...\n");
-      }
+      current->filename = malloc(FILENAME_MAX + 1);
+      memset(current->filename, 0, FILENAME_MAX + 1);
+      strncpy(current->filename, optarg, FILENAME_MAX);
+      current->next = malloc(sizeof(struct file_element));
+      memset(current->next, 0, sizeof(struct file_element));
+      current = current->next;
       break;
 
     case 'v':
