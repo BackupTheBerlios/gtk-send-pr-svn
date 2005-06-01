@@ -5,7 +5,7 @@ LOCALBASE?=/usr/local
 
 GTK_CFLAGS!=pkg-config gtk+-2.0 --cflags
 ESMTP_CFLAGS!=libesmtp-config --cflags
-CFLAGS+= -Wall -g -DGTK_DISABLE_DEPRECATED ${GTK_CFLAGS} ${ESMTP_CFLAGS}
+CFLAGS+= -Wall -g ${GTK_CFLAGS} ${ESMTP_CFLAGS}
 
 GTK_LDFLAGS!=pkg-config gtk+-2.0 --libs
 ESMTP_LDFLAGS!=libesmtp-config --libs
