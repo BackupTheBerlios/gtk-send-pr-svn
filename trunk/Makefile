@@ -16,6 +16,7 @@ LDFLAGS+= -L${LOCALBASE}/lib -lefence
 .endif
 
 OBJECTS= main.o gtk_ui.o user_settings.o smtp.o file.o
+HEADERS= file.h gtk_ui.h smtp.h gtk-send-pr.h pr_defs.h user_settings.h
 
 all:	$(OBJECTS)
 	$(CC) $(LDFLAGS) -o gtk-send-pr $(OBJECTS)
@@ -26,4 +27,3 @@ install:
 
 clean:
 	rm -f *.o gtk-send-pr gtk-send-pr.core
-
