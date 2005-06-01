@@ -82,10 +82,10 @@ send_pr(PROBLEM_REPORT *mypr)
 
   if(gsp_auth_done!=TRUE) {
 
-    my_auth=malloc(sizeof(GSP_AUTH));
-    my_auth->username=malloc(1024);
+    my_auth = malloc(sizeof(GSP_AUTH));
+    my_auth->username = malloc(1024);
     memset(my_auth->username, 0, 1024);
-    my_auth->password=malloc(1024);
+    my_auth->password = malloc(1024);
     memset(my_auth->password, 0, 1024);
 
   }
@@ -94,16 +94,16 @@ send_pr(PROBLEM_REPORT *mypr)
 
   if(tmpdir != NULL) {
 
-  sprintf(tempfile, "%s/gtk-send-pr.XXXXXXXX", tmpdir);
+    snprintf(tempfile, 1024, "%s/gtk-send-pr.XXXXXXXX", tmpdir);
 
   } else {
 
-  sprintf(tempfile, "/tmp/gtk-send-pr.XXXXXXXX");
+    snprintf(tempfile, 1024, "/tmp/gtk-send-pr.XXXXXXXX");
 
   }
 
-  tempfd=mkstemp(tempfile);
-  fp=fdopen(tempfd, "w");
+  tempfd = mkstemp(tempfile);
+  fp = fdopen(tempfd, "w");
 
   build_message(fp, mypr);
 
@@ -115,7 +115,7 @@ send_pr(PROBLEM_REPORT *mypr)
 
   snprintf(my_smtp_server, 1024, "%s:25", mypr->smtp_server);
 
-  host=my_smtp_server;
+  host = my_smtp_server;
 
   smtp_set_server(session, host);
 
@@ -142,25 +142,25 @@ send_pr(PROBLEM_REPORT *mypr)
   smtp_set_message_fp(message, fp);
 
   /* Recipient must be in RFC2821 format */
-  snprintf(my_recipient,1024,"%s",mypr->smtp_to);
+  snprintf(my_recipient, 1024, "%s", mypr->smtp_to);
   recipient = smtp_add_recipient(message, my_recipient);
   smtp_dsn_set_notify(recipient, notify);
 
-  if((mypr->smtp_cc_num)>0) {
+  if((mypr->smtp_cc_num) > 0) {
 
-    for(i=0;i<(mypr->smtp_cc_num);i++) {
+    for(i=0; i<(mypr->smtp_cc_num); i++) {
 
-      smtp_set_header(message, "CC",NULL, mypr->smtp_cc[i]);
-      snprintf(my_recipient,1024,"%s",mypr->smtp_cc[i]);
-      recipient = smtp_add_recipient (message,my_recipient);
-      smtp_dsn_set_notify (recipient, notify);			
+      smtp_set_header(message, "CC", NULL, mypr->smtp_cc[i]);
+      snprintf(my_recipient,1024, "%s", mypr->smtp_cc[i]);
+      recipient = smtp_add_recipient(message, my_recipient);
+      smtp_dsn_set_notify(recipient, notify);			
 
     }
   }
 
   if (!smtp_start_session(session)) {
 
-    snprintf(global_smtp_error_msg,1024,"SMTP server problem : %s\n",
+    snprintf(global_smtp_error_msg, 1024, "SMTP server problem : %s\n",
 	     smtp_strerror(smtp_errno(), buf, sizeof buf));
 
     status = smtp_message_transfer_status(message);
@@ -191,7 +191,7 @@ void
 build_message(FILE *fp,PROBLEM_REPORT *mypr)
 {
 
-  fprintf(fp,"Return-Path: <%s>\r\n",mypr->smtp_from);
+  fprintf(fp,"Return-Path: <%s>\r\n", mypr->smtp_from);
   fprintf(fp,"Subject: %s\r\n", mypr->smtp_subject);
   fprintf(fp,"MIME-Version: 1.0\r\n");
   fprintf(fp,"Content-Type: text/plain;\r\n");
@@ -200,35 +200,35 @@ build_message(FILE *fp,PROBLEM_REPORT *mypr)
   fprintf(fp,"X-send-pr-version: gtk-send-pr " GSP_VERSION " \r\n");
   fprintf(fp,"X-GNATS-Notify: \r\n");
   fprintf(fp,"\r\n\r\n");
-  fprintf(fp,">Submitter-Id:	%s \r\n",mypr->submitter_id);
-  fprintf(fp,">Originator:	%s \r\n",mypr->originator);
-  fprintf(fp,">Organization:	%s \r\n",mypr->organization);
+  fprintf(fp,">Submitter-Id:	%s \r\n", mypr->submitter_id);
+  fprintf(fp,">Originator:	%s \r\n", mypr->originator);
+  fprintf(fp,">Organization:	%s \r\n", mypr->organization);
   fprintf(fp,">Confidential:	no \r\n");
-  fprintf(fp,">Synopsis:	%s \r\n",mypr->synopsis);
-  fprintf(fp,">Severity:	%s \r\n",mypr->severity);
-  fprintf(fp,">Priority:	%s \r\n",mypr->priority);
-  fprintf(fp,">Category:	%s \r\n",mypr->category);
-  fprintf(fp,">Class:		%s \r\n",mypr->class);
-  fprintf(fp,">Release:	%s \r\n",mypr->release);
+  fprintf(fp,">Synopsis:	%s \r\n", mypr->synopsis);
+  fprintf(fp,">Severity:	%s \r\n", mypr->severity);
+  fprintf(fp,">Priority:	%s \r\n", mypr->priority);
+  fprintf(fp,">Category:	%s \r\n", mypr->category);
+  fprintf(fp,">Class:		%s \r\n", mypr->class);
+  fprintf(fp,">Release:	%s \r\n", mypr->release);
 
   fprintf(fp,">Environment:\r\n");
   fprintf(fp,"\r\n\r\n");
-  fprintf(fp,"%s\r\n",mypr->environment);
+  fprintf(fp,"%s\r\n", mypr->environment);
   fprintf(fp,"\r\n\r\n");
 
   fprintf(fp,">Description:\r\n");
   fprintf(fp,"\r\n\r\n");
-  fprintf(fp,"%s\r\n",mypr->description);
+  fprintf(fp,"%s\r\n", mypr->description);
   fprintf(fp,"\r\n\r\n");
 
   fprintf(fp,">How-To-Repeat:\r\n");
   fprintf(fp,"\r\n\r\n");	
-  fprintf(fp,"%s\r\n",mypr->how_to_repeat);
+  fprintf(fp,"%s\r\n", mypr->how_to_repeat);
   fprintf(fp,"\r\n\r\n");
 
   fprintf(fp,">Fix:\r\n");
   fprintf(fp,"\r\n\r\n");		
-  fprintf(fp,"%s\r\n",mypr->fix);
+  fprintf(fp,"%s\r\n", mypr->fix);
   fprintf(fp,"\r\n\r\n");	
 
 }
@@ -238,7 +238,7 @@ authinteract(auth_client_request_t request, char **result, int fields, void *arg
 {
   int i;
 
-  if(gsp_auth_done!=TRUE) {
+  if(gsp_auth_done != TRUE) {
 
     gsp_smtp_auth_dialog(my_auth);
 
