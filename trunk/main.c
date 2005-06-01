@@ -56,7 +56,7 @@ main(int argc, char **argv)
 					}
 					break;
 			case 'v':
-					printf("gtk-send-pr 0.2 \"Southern Sun\"\n"
+					printf("gtk-send-pr 0.2.1 \"Solaris\"\n"
 					"Copyright (c) 2003, Miguel Mendez."
 					" All rights reserved.\n");
 					exit(EXIT_SUCCESS);

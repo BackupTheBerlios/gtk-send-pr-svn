@@ -44,6 +44,7 @@ extern char *tzname[2];
 #include "gtk_ui.h"
 #include "smtp.h"
 #include "pr_defs.h"
+#include "user_settings.h"
 
 extern char global_smtp_error_msg[1024];
 
@@ -53,8 +54,8 @@ void quit_pressed(GtkWidget *, gpointer);
 void about_pressed(GtkWidget *, gpointer);
 void help_pressed(GtkWidget *, gpointer);
 void send_pressed(GtkWidget *, gpointer);
-void save_settings(void);
 void fill_pr(PROBLEM_REPORT *);
+void update_profile(void);
 	
 	extern char *included_file;
 	
@@ -63,7 +64,6 @@ void fill_pr(PROBLEM_REPORT *);
 	struct passwd *my_user;
 	struct utsname my_uname;
 	USER_PROFILE my_profile;
-
 	GtkWidget	*type_entry1;
 
 	GtkWidget	*email_entry1;
@@ -163,8 +163,6 @@ create_gtk_ui(void)
 		GtkWidget	*scrolled_window3;
 		GtkWidget	*scrolled_window4;				
 
-		char *homedir;
-		char temp[1024];
 		int fd;
 		char uname_srm[256];
 		char uname_snrvm[1024]; /* better safe than sorry */
@@ -184,32 +182,9 @@ create_gtk_ui(void)
 		}
 
 
-	/* Set the size */
 
+	load_settings(&my_profile);
 	
-	homedir=getenv("HOME");
-	if(homedir!=NULL) {
-	
-		snprintf(temp,1024,"%s/%s",homedir,".gtk-send-pr-rc");
-		fd=open(temp,O_RDONLY,0);
-		if(fd!=-1) {
-		read(fd,&my_profile,sizeof(USER_PROFILE));
-		close(fd);
-		} else  {
-		
-			/* Let's see who am I */
-			my_user=getpwuid(getuid());
-
-			my_profile.geom_x=400;
-			my_profile.geom_y=480;
-			strncpy(my_profile.name,my_user->pw_gecos,255);
-			strncpy(my_profile.email,my_user->pw_name,255);
-			sprintf(my_profile.org," ");
-			sprintf(my_profile.smtp,"FILL THIS!!!");
-		}
-		
-	}
-
 	snprintf(uname_srm,255,"%s %s %s  ",my_uname.sysname, \
 									my_uname.release, \
 									my_uname.machine);
@@ -653,7 +628,8 @@ delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
 	
 	if(result==GTK_RESPONSE_YES) {
 	
-		save_settings();
+		update_profile();
+		save_settings(&my_profile);
     	return FALSE;
 
 	} else {
@@ -666,7 +642,8 @@ delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
 void 
 destroy( GtkWidget *widget, gpointer data)
 {
-	save_settings();
+	update_profile();
+	save_settings(&my_profile);
 	gtk_main_quit();
 }
 
@@ -688,13 +665,15 @@ quit_pressed( GtkWidget *widget, gpointer data)
 
 				if(result==GTK_RESPONSE_YES) {
 
-				save_settings();
+				update_profile();
+				save_settings(&my_profile);
 				gtk_main_quit();
 			}
 
 		} else {
 
-		save_settings();
+		update_profile();
+		save_settings(&my_profile);
 		gtk_main_quit();
 
 		}
@@ -712,7 +691,7 @@ about_pressed( GtkWidget *widget, gpointer data)
 		GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_MESSAGE_INFO,
 		GTK_BUTTONS_OK,
-		"gtk-send-pr 0.2 \"Southern Sun\"\nCopyright (c) 2003, "
+		"gtk-send-pr 0.2.1 \"Solaris\"\nCopyright (c) 2003, "
 		"Miguel Mendez\nE-Mail: <flynn@energyhq.es.eu.org>\n"
 		"http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
 		gtk_dialog_run (GTK_DIALOG (dialog));
@@ -767,45 +746,6 @@ send_pressed( GtkWidget *widget, gpointer data)
 		gtk_widget_destroy (dialog);	
 	
 	}
-}
-void
-save_settings(void)
-{
-
-	int newsize[2];
-	char *homedir;
-	char temp[1024];
-	char *tmp_entry;
-	int fd;
-
-		
-	gtk_window_get_size(GTK_WINDOW(window),&newsize[0],&newsize[1]);
-	
-	my_profile.geom_x=newsize[0];
-	my_profile.geom_y=newsize[1];
-	
-	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry2);
-	strncpy(my_profile.email,tmp_entry,255);
-	
-	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry6);
-	strncpy(my_profile.name,tmp_entry,255);	
-	
-	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry7);
-	strncpy(my_profile.org,tmp_entry,255);	
-
-	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry8);
-	strncpy(my_profile.smtp,tmp_entry,255);
-
-	
-	homedir=getenv("HOME");
-	if(homedir==NULL) return;
-	snprintf(temp,1024,"%s/%s",homedir,".gtk-send-pr-rc");
-	fd=open(temp,O_WRONLY|O_CREAT|O_TRUNC,0666);
-	if(fd==-1) return;
-	write(fd,&my_profile,sizeof(USER_PROFILE));
-	close(fd);
-	return;
-
 }
 
 void fill_pr(PROBLEM_REPORT *mypr)
@@ -949,4 +889,30 @@ void fill_pr(PROBLEM_REPORT *mypr)
 	}
 
 	mypr->fix=fix_buffer;
+}
+
+void 
+update_profile(void)
+{
+	int newsize[2];
+	char *tmp_entry;
+	
+	
+	gtk_window_get_size(GTK_WINDOW(window),&newsize[0],&newsize[1]);
+	
+	my_profile.geom_x=newsize[0];
+	my_profile.geom_y=newsize[1];
+	
+	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry2);
+	strncpy(my_profile.email,tmp_entry,255);
+	
+	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry6);
+	strncpy(my_profile.name,tmp_entry,255);	
+	
+	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry7);
+	strncpy(my_profile.org,tmp_entry,255);	
+
+	tmp_entry=(char *)gtk_entry_get_text((GtkEntry *)email_entry8);
+	strncpy(my_profile.smtp,tmp_entry,255);
+
 }
