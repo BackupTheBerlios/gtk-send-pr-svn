@@ -1,0 +1,87 @@
+.Dd May, 02 2003
+.Os 
+.Dt "gtk-send-pr" 1 CON
+.Sh NAME
+.Nm gtk-send-pr - send problem report (PR) to a central support site
+.Nd 
+.Sh SYNOPSIS
+.Nm
+.Op Ar \-a file
+.Op Fl vh
+.Sh DESCRIPTION
+gtk-send-pr is a problem reporting tool 
+.Po based on GTK+
+.Pc 
+, similar to send-pr.
+.Pp
+The following options can be used:
+.Pp
+.Ar \-a file
+Include file in the Fix: section
+.br
+.Fl v
+Show version and exit
+.br
+.Fl h
+Show help
+.br
+.Sh The user interface
+The user interface has two parts: the tabs and the buttons. The buttons should be self explanatory 
+for most people. 
+.Do
+Send
+.Dc will send the PR to the selected SMTP server.
+.Do
+About
+.Dc shows the version information dialog.
+.Do
+Help
+.Dc pops up a window with this information, and, finally,
+.Do
+Quit
+.Dc exits the program, warning the user if the PR has not been sent yet.
+.Sh Parts of a PR
+The first tab contains user info, as well as SMTP settings. Do not forget 
+to properly set the SMTP server, or the program will fail when trying to 
+send the PR. Users should not modify the 
+.Do
+To
+.Dc address.
+.Pp
+The 
+.Do
+Type
+.Dc tab contains information about the PR, like the 
+.Do
+Synopsis
+.Dc and other information. The pull down menus are easy to use.
+.Pp
+.Do
+System
+.Dc contains information about your system. Again, most users do not need 
+to add anything here.
+.Pp
+.Do
+Details
+.Dc is a very important section. Here is where the explanation about what the PR is 
+comes. Note that the
+.Do
+-a
+.Dc option will include a file in the 
+.Do
+Fix
+.Dc section, which is usually used to send patches and shars.
+.Pp
+Once you have finished filling the relevant fields, press
+.Do
+Send
+.Dc to send the problem report.
+.Sh SEE ALSO
+.Xr send-pr 1
+.Sh HISTORY
+gtk-send-pr was created to help people who are new to FreeBSD send better problem reports. The project 
+started in May 2003.
+.Sh AUTHORS
+.An "Miguel Mendez" Aq flynn@energyhq.es.eu.org
+.Sh BUGS
+Sure.
