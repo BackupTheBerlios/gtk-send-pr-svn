@@ -33,54 +33,55 @@ $Id$
 #include <fcntl.h>
 
 #include <gtk/gtk.h>
-#include "gtk_ui.h"
 
+#include "gtk-send-pr.h"
+#include "gtk_ui.h"
 
 void usage(void);
 
-	char *included_file=NULL;
-	
 int
 main(int argc, char **argv)
 {
-	int ch;
-	
-	while((ch = getopt(argc, argv, "avh")) != -1) {
-		
-		switch(ch) {
-			case 'a':
-					if(argc>2) {
-						included_file=argv[optind];
-					} else {
-						usage();
-					}
-					break;
-			case 'v':
-					printf("gtk-send-pr 0.2.1 \"Solaris\"\n"
-					"Copyright (c) 2003, Miguel Mendez."
-					" All rights reserved.\n");
-					exit(EXIT_SUCCESS);
-			case 'h':
-			default:
-					usage();
-		}
-	argc -= optind;
-	argv += optind;
+  int ch;
+  char *included_file=NULL;
 
-	}
-		
-	gtk_init (&argc, &argv);
+  while((ch = getopt(argc, argv, "avh")) != -1) {
+
+    switch(ch) {
+    case 'a':
+      if(argc>2) {
+	included_file=argv[optind];
+      } else {
+	usage();
+      }
+      break;
+    case 'v':
+      printf("gtk-send-pr " GSP_VERSION " " GSP_CODENAME "\n"
+	     "Copyright (c) 2003, Miguel Mendez."
+	     " All rights reserved.\n");
+      exit(EXIT_SUCCESS);
+    case 'h':
+    default:
+      usage();
+    }
+    argc -= optind;
+    argv += optind;
+
+  }
 	
-	create_gtk_ui();
-	return(0);
+  gtk_init (&argc, &argv);
+
+  create_gtk_ui(included_file);
+  return(0);
+
 }
 
 void
 usage(void)
 {
-	printf("usage: gtk-send-pr [-a file] [-v] [-h]\n");
-	printf("\t-a file\tinclude file in the Fix: section\n");
-	printf("\t-v\tshow version and exit\n");
-	printf("\t-h\tshow this screen\n");
-	exit(EXIT_SUCCESS);
+  printf("usage: gtk-send-pr [-a file] [-v] [-h]\n");
+  printf("\t-a file\tinclude file in the Fix: section\n");
+  printf("\t-v\tshow version and exit\n");
+  printf("\t-h\tshow this screen\n");
+  exit(EXIT_SUCCESS);
 }

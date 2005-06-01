@@ -25,8 +25,8 @@ $Id$
 
 */
 
-#define GSP_VERSION "0.2"
-
+#define GSP_VERSION "0.3"
+#define GSP_CODENAME "\"Money can buy me love\""
 typedef struct user_prfile {
 
 	char name[255];
