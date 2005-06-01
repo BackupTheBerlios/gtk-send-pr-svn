@@ -49,5 +49,9 @@ $Id$
 int
 main(int argc, char **argv)
 {
-
+	
+	gtk_init (&argc, &argv);
+	
+	create_gtk_ui();
+	return(0);
 }

@@ -28,6 +28,6 @@ $Id$
 
 */
 
-int create_gtk_ui(RC_NODE *, int, RC_NODE *, int);
+int create_gtk_ui(void);
 
 
