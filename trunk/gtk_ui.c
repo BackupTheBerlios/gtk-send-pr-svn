@@ -796,6 +796,7 @@ quit_pressed( GtkWidget *widget, gpointer data)
 static void
 about_pressed( GtkWidget *widget, gpointer data)
 {
+#if(GTK_MINOR_VERSION>=6)
 
   const gchar *authors[] = {
     "Miguel Mendez <flynn@energyhq.es.eu.org>",
@@ -835,6 +836,24 @@ about_pressed( GtkWidget *widget, gpointer data)
 			"website", "http://www.energyhq.es.eu.org/gtk-send-pr.html",
 			NULL);
 
+#else
+
+  GtkWidget *dialog;
+
+  dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				  GTK_DIALOG_DESTROY_WITH_PARENT,
+				  GTK_MESSAGE_INFO,
+				  GTK_BUTTONS_OK,
+				  "gtk-send-pr "
+				  GSP_VERSION " "
+				  GSP_CODENAME
+				  "\nCopyright (c) 2003-2005, "
+				  "Miguel Mendez\nE-Mail: <flynn@energyhq.es.eu.org>\n"
+				  "http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
+  gtk_dialog_run(GTK_DIALOG(dialog));
+  gtk_widget_destroy(dialog);
+
+#endif
 }
 
 static void
