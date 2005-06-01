@@ -25,8 +25,8 @@
 
 */
 
-#define GSP_VERSION "0.4.2"
-#define GSP_CODENAME "\"When Sorrow Sang\""
+#define GSP_VERSION "0.4.3"
+#define GSP_CODENAME "\"The trick is to keep breathing\""
 
 typedef struct user_prfile {
 

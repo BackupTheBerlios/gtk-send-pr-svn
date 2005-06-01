@@ -1,4 +1,4 @@
-.Dd Jan, 18 2005
+.Dd Jan, 25 2005
 .Os 
 .Dt "gtk-send-pr" 1 CON
 .Sh NAME
@@ -7,7 +7,10 @@
 .Sh SYNOPSIS
 .Nm
 .Op Ar \-a file
-.Op Fl mvh
+.Op Fl m
+.Op Fl v
+.Op Fl h
+.Op Fl L
 .Sh DESCRIPTION
 gtk-send-pr is a problem reporting tool 
 .Po based on GTK+
@@ -17,16 +20,19 @@ gtk-send-pr is a problem reporting tool
 The following options can be used:
 .Pp
 .Ar \-a file
-Include file in the Fix: section
+include file in the Fix: section
 .br
 .Fl m
-Enable maintainer mode
+enable maintainer mode
 .br
 .Fl v
-Show version and exit
+show version and exit
 .br
 .Fl h
-Show help
+show help
+.br
+.Fl L
+list available categories and exit
 .br
 .Sh The user interface
 The user interface has two parts: the tabs and the buttons. The buttons should be self explanatory 

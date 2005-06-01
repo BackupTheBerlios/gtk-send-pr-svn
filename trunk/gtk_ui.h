@@ -27,4 +27,5 @@ $Id$
 
 int create_gtk_ui(char *, int);
 int gsp_smtp_auth_dialog(GSP_AUTH *);
+void show_categories(void);
 

@@ -36,6 +36,7 @@
 #include "gtk-send-pr.h"
 #include "gtk_ui.h"
 
+
 static void usage(void);
 static void about(void);
 
@@ -49,7 +50,7 @@ main(int argc, char **argv)
 
   memset(included_file, 0, sizeof(included_file));
 
-  while ((ch = getopt(argc, argv, "a:mvh")) != -1) {
+  while ((ch = getopt(argc, argv, "a:mvhL")) != -1) {
 
     switch(ch) {
 
@@ -66,6 +67,9 @@ main(int argc, char **argv)
       maintainer = MAINT_YES;
       break;
 
+    case 'L':
+      show_categories();
+      break;
     case '?':
     case 'h':
     default:
@@ -97,11 +101,12 @@ main(int argc, char **argv)
 static void
 usage(void)
 {
-  printf("usage: gtk-send-pr [-a file] [-m] [-v] [-h]\n");
+  printf("usage: gtk-send-pr [-a file] [-m] [-v] [-h] [-L]\n");
   printf("\t-a file\tinclude file in the Fix: section\n");
   printf("\t-m\tenable maintainer mode (see man page)\n");
   printf("\t-v\tshow version and exit\n");
   printf("\t-h\tshow this screen\n");
+  printf("\t-L\tlist available categories and exit\n");
   exit(EXIT_SUCCESS);
 }
 

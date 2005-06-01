@@ -479,7 +479,7 @@ create_gtk_ui(char *included_file, int maint_mode)
 
       for(i=0;i<(sizeof(pr_categories)/sizeof(char *));i++) {
 
-	if(strncmp(pr_categories[i], maint_cat, 255) == 0 ) {
+	if(strncmp(pr_categories[i], MAINT_CAT, 255) == 0 ) {
 
 	  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), i);
 	  break;
@@ -515,7 +515,7 @@ create_gtk_ui(char *included_file, int maint_mode)
 
     for(i=0; i < (sizeof(pr_classes)/sizeof(char *)); i++) {
 
-	if(strncmp(pr_classes[i], maint_class, 255) == 0 ) {
+	if(strncmp(pr_classes[i], MAINT_CLASS, 255) == 0 ) {
 
 	  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo4), i);
 	  break;
@@ -1320,3 +1320,46 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   gsp_auth_done = TRUE;
   
 }
+
+/* Show available categories */
+void 
+show_categories(void)
+{
+  int i;
+  int len;
+  int written;
+  char my_fmt[16];
+
+  printf("Known categories:\n");
+
+  len = 0;
+
+  for(i=0; i<(sizeof(pr_categories)/sizeof(char *)); i++) {
+
+    if(strlen(pr_categories[i]) > len ) len = strlen(pr_categories[i]);
+
+  }
+
+  snprintf(my_fmt, sizeof(my_fmt), "%%-%is ", len);
+
+  written = 0;
+
+  for(i=0; i<(sizeof(pr_categories)/sizeof(char *)); i++) {
+
+    written += printf(my_fmt, pr_categories[i]);
+
+    if(written >= 70 ) {
+
+      written = 0;
+      printf("\n");
+
+    }
+
+  }
+
+  printf("\n");
+
+  exit(EXIT_SUCCESS);
+
+}
+

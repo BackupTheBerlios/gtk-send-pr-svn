@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2004, Miguel Mendez. All rights reserved.
+  Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -51,13 +51,22 @@ extern char *tzname[2];
 
 
 static void build_message(FILE *, PROBLEM_REPORT *);
-static int authinteract(auth_client_request_t request, char **result, int fields, void *arg);
+static int authinteract(auth_client_request_t request, 
+			char **result, int fields, void *arg);
 
 char global_smtp_error_msg[1024];
 static GSP_AUTH *my_auth = NULL;
 
 extern int gsp_auth_done;
-	
+
+/*
+ * Builds the message and tries to send it
+ * via the specified SMTP server. Returns 0
+ * if everything went ok, -1 if someting goes
+ * south and sets `global_smtp_error_msg'.
+ * If AUTH is required, a dialog will pop up
+ * asking the user to authenticate.
+ */
 int
 send_pr(PROBLEM_REPORT *mypr)
 {
@@ -72,7 +81,7 @@ send_pr(PROBLEM_REPORT *mypr)
 
   enum notify_flags notify = Notify_SUCCESS|Notify_FAILURE;
   FILE *fp;
-  char tempfile[1024];
+  char tempfile[FILENAME_MAX + 1];
   char *tmpdir;
   int  tempfd;
 
@@ -92,13 +101,15 @@ send_pr(PROBLEM_REPORT *mypr)
 
   tmpdir = getenv("TMPDIR");
 
+  memset(tempfile, 0, sizeof(tempfile));
+
   if(tmpdir != NULL) {
 
-    snprintf(tempfile, 1024, "%s/gtk-send-pr.XXXXXXXX", tmpdir);
+    snprintf(tempfile, FILENAME_MAX, "%s/gtk-send-pr.XXXXXXXX", tmpdir);
 
   } else {
 
-    snprintf(tempfile, 1024, "/tmp/gtk-send-pr.XXXXXXXX");
+    snprintf(tempfile, FILENAME_MAX , "/tmp/gtk-send-pr.XXXXXXXX");
 
   }
 
@@ -119,7 +130,7 @@ send_pr(PROBLEM_REPORT *mypr)
 
   smtp_set_server(session, host);
 
-  i=smtp_starttls_enable(session, Starttls_DISABLED);
+  i = smtp_starttls_enable(session, Starttls_DISABLED);
 
   authctx = auth_create_context();
   auth_set_mechanism_flags(authctx, AUTH_PLUGIN_PLAIN, 0);
@@ -151,7 +162,7 @@ send_pr(PROBLEM_REPORT *mypr)
     for(i=0; i<(mypr->smtp_cc_num); i++) {
 
       smtp_set_header(message, "CC", NULL, mypr->smtp_cc[i]);
-      snprintf(my_recipient,1024, "%s", mypr->smtp_cc[i]);
+      snprintf(my_recipient, 1024, "%s", mypr->smtp_cc[i]);
       recipient = smtp_add_recipient(message, my_recipient);
       smtp_dsn_set_notify(recipient, notify);			
 
@@ -175,6 +186,27 @@ send_pr(PROBLEM_REPORT *mypr)
   } else {
 
     status = smtp_message_transfer_status(message);
+
+    if(status != NULL) {
+
+      /* Something went wrong... */
+      if(status->code >= 400) {
+
+	snprintf(global_smtp_error_msg, 1024, "SMTP server problem : %i %s\n",
+		 status->code, status->text);
+
+	smtp_destroy_session(session);
+	auth_destroy_context(authctx);
+	fclose(fp);
+	unlink(tempfile);
+	auth_client_exit();
+
+	return(-1);
+
+      }
+
+    }
+
     smtp_destroy_session(session);
     auth_destroy_context(authctx);
     fclose(fp);
@@ -191,45 +223,45 @@ static void
 build_message(FILE *fp, PROBLEM_REPORT *mypr)
 {
 
-  fprintf(fp,"Return-Path: <%s>\r\n", mypr->smtp_from);
-  fprintf(fp,"Subject: %s\r\n", mypr->smtp_subject);
-  fprintf(fp,"MIME-Version: 1.0\r\n");
-  fprintf(fp,"Content-Type: text/plain;\r\n");
-  fprintf(fp,"  charset=iso-8859-1\r\n");
-  fprintf(fp,"Content-Transfer-Encoding: 7bit\r\n");
-  fprintf(fp,"X-send-pr-version: gtk-send-pr " GSP_VERSION " \r\n");
-  fprintf(fp,"X-GNATS-Notify: \r\n");
-  fprintf(fp,"\r\n\r\n");
-  fprintf(fp,">Submitter-Id:	%s \r\n", mypr->submitter_id);
-  fprintf(fp,">Originator:	%s \r\n", mypr->originator);
-  fprintf(fp,">Organization:	%s \r\n", mypr->organization);
-  fprintf(fp,">Confidential:	no \r\n");
-  fprintf(fp,">Synopsis:	%s \r\n", mypr->synopsis);
-  fprintf(fp,">Severity:	%s \r\n", mypr->severity);
-  fprintf(fp,">Priority:	%s \r\n", mypr->priority);
-  fprintf(fp,">Category:	%s \r\n", mypr->category);
-  fprintf(fp,">Class:		%s \r\n", mypr->class);
-  fprintf(fp,">Release:	%s \r\n", mypr->release);
+  fprintf(fp, "Return-Path: <%s>\r\n", mypr->smtp_from);
+  fprintf(fp, "Subject: %s\r\n", mypr->smtp_subject);
+  fprintf(fp, "MIME-Version: 1.0\r\n");
+  fprintf(fp, "Content-Type: text/plain;\r\n");
+  fprintf(fp, "  charset=iso-8859-1\r\n");
+  fprintf(fp, "Content-Transfer-Encoding: 7bit\r\n");
+  fprintf(fp, "X-send-pr-version: gtk-send-pr " GSP_VERSION " \r\n");
+  fprintf(fp, "X-GNATS-Notify: \r\n");
+  fprintf(fp, "\r\n\r\n");
+  fprintf(fp, ">Submitter-Id:	%s \r\n", mypr->submitter_id);
+  fprintf(fp, ">Originator:	%s \r\n", mypr->originator);
+  fprintf(fp, ">Organization:	%s \r\n", mypr->organization);
+  fprintf(fp, ">Confidential:	no \r\n");
+  fprintf(fp, ">Synopsis:	%s \r\n", mypr->synopsis);
+  fprintf(fp, ">Severity:	%s \r\n", mypr->severity);
+  fprintf(fp, ">Priority:	%s \r\n", mypr->priority);
+  fprintf(fp, ">Category:	%s \r\n", mypr->category);
+  fprintf(fp, ">Class:		%s \r\n", mypr->class);
+  fprintf(fp, ">Release:	%s \r\n", mypr->release);
 
-  fprintf(fp,">Environment:\r\n");
-  fprintf(fp,"\r\n\r\n");
-  fprintf(fp,"%s\r\n", mypr->environment);
-  fprintf(fp,"\r\n\r\n");
+  fprintf(fp, ">Environment:\r\n");
+  fprintf(fp, "\r\n\r\n");
+  fprintf(fp, "%s\r\n", mypr->environment);
+  fprintf(fp, "\r\n\r\n");
 
-  fprintf(fp,">Description:\r\n");
-  fprintf(fp,"\r\n\r\n");
-  fprintf(fp,"%s\r\n", mypr->description);
-  fprintf(fp,"\r\n\r\n");
+  fprintf(fp, ">Description:\r\n");
+  fprintf(fp, "\r\n\r\n");
+  fprintf(fp, "%s\r\n", mypr->description);
+  fprintf(fp, "\r\n\r\n");
 
-  fprintf(fp,">How-To-Repeat:\r\n");
-  fprintf(fp,"\r\n\r\n");	
-  fprintf(fp,"%s\r\n", mypr->how_to_repeat);
-  fprintf(fp,"\r\n\r\n");
+  fprintf(fp, ">How-To-Repeat:\r\n");
+  fprintf(fp, "\r\n\r\n");	
+  fprintf(fp, "%s\r\n", mypr->how_to_repeat);
+  fprintf(fp, "\r\n\r\n");
 
-  fprintf(fp,">Fix:\r\n");
-  fprintf(fp,"\r\n\r\n");		
-  fprintf(fp,"%s\r\n", mypr->fix);
-  fprintf(fp,"\r\n\r\n");	
+  fprintf(fp, ">Fix:\r\n");
+  fprintf(fp, "\r\n\r\n");		
+  fprintf(fp, "%s\r\n", mypr->fix);
+  fprintf(fp, "\r\n\r\n");	
 
 }
 
