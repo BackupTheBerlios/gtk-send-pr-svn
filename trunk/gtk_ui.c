@@ -71,11 +71,9 @@ static void fill_pr(PROBLEM_REPORT *);
 static void update_profile(void);
 static void fix_view_drag_data_received(GtkWidget *, GdkDragContext *, 
 					gint, gint, GtkSelectionData *, guint, guint);
-/* extern char *included_file; */
 
 static int dirty;
 static GtkWidget *window;
-/*  static struct passwd *my_user; */
 
 static USER_PROFILE my_profile;
 static GtkWidget *type_entry1;
@@ -98,8 +96,6 @@ static GtkWidget *details_view1;
 static GtkWidget *details_view2;
 static GtkWidget *fix_view;
 
-/* static GtkWidget *fix_filsel; */
-
 static GtkTextBuffer *fix_buffer1;
 static GtkWidget *send_button;
 
@@ -117,8 +113,6 @@ static GtkWidget *auth_label;
 static GtkWidget *auth_userframe;
 static GtkWidget *auth_passframe;
 static GtkWidget *auth_ok;
-
-/*  static GtkWidget *auth_cancel; */
 
 static GtkWidget *auth_userentry;
 static GtkWidget *auth_passentry;
@@ -221,15 +215,15 @@ create_gtk_ui(char *included_file)
   char file_warning[1024];
 
   /* Drag and drop support */
-  enum {
-    TARGET_STRING,
-    TARGET_ROOTWIN
+  enum
+  {
+    TARGET_URI_LIST
   };
 
   static GtkTargetEntry target_table[] = {
-    { "STRING",     0, TARGET_STRING },
-    { "text/plain", 0, TARGET_STRING },
-    { "application/x-rootwindow-drop", 0, TARGET_ROOTWIN }
+
+    { "text/uri-list", 0, TARGET_URI_LIST },
+
   };
 
   static guint n_targets = sizeof(target_table) / sizeof(target_table[0]);
@@ -573,11 +567,12 @@ create_gtk_ui(char *included_file)
   /* Drag and drop support */
   gtk_drag_dest_set(fix_view,
 		    GTK_DEST_DEFAULT_ALL,
-		    target_table, n_targets - 1, /* no rootwin */
+		    target_table, n_targets,
 		    GDK_ACTION_COPY | GDK_ACTION_MOVE);
+  /* XXX - Why do we need GDK_ACTION_MOVE for dnd to work with Konqueror? */
 
-  g_signal_connect(fix_view, "drag_data_received",
-		   G_CALLBACK(fix_view_drag_data_received), NULL);
+ g_signal_connect(fix_view, "drag_data_received",
+		  G_CALLBACK(fix_view_drag_data_received), NULL);
 
   fix_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
 
