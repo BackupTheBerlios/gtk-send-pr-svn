@@ -26,4 +26,4 @@ install:
 	${BSD_INSTALL_MAN} gtk-send-pr.1 ${PREFIX}/man/man1
 
 clean:
-	rm -f *.o gtk-send-pr gtk-send-pr.core
+	rm -f *.o *.c~ *.h~ gtk-send-pr gtk-send-pr.core
