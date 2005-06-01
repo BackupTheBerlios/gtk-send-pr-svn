@@ -25,8 +25,8 @@
 
 */
 
-#define GSP_VERSION "0.4.3"
-#define GSP_CODENAME "\"The trick is to keep breathing\""
+#define GSP_VERSION "0.4.4"
+#define GSP_CODENAME "\"Do It For The Kids\""
 
 typedef struct user_prfile {
 
