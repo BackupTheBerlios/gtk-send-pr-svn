@@ -65,8 +65,7 @@ void help_pressed(GtkWidget *, gpointer);
 void send_pressed(GtkWidget *, gpointer);
 void open_pressed(GtkWidget *, gpointer);
 void clear_fix_pressed(GtkWidget *, gpointer);
-void select_ok(GtkWidget *, gpointer);
-void select_cancelled(GtkWidget *, gpointer);
+
 void auth_ok_pressed(GtkWidget *, gpointer);
 void fill_pr(PROBLEM_REPORT *);
 void update_profile(void);
@@ -249,10 +248,10 @@ create_gtk_ui(char *included_file)
   gtk_window_set_default_size(GTK_WINDOW(window), my_profile.geom_x, my_profile.geom_y);
 
   /* Set the icon */
-  icon16_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug16);
-  icon32_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug32);
-  icon48_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug48);
-  icon64_pixbuf=gdk_pixbuf_new_from_xpm_data((const char **)ladybug64);
+  icon16_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug16);
+  icon32_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug32);
+  icon48_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug48);
+  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug64);
 
   g_list_append(icon_list, icon16_pixbuf);
   g_list_append(icon_list, icon32_pixbuf);
@@ -290,23 +289,23 @@ create_gtk_ui(char *included_file)
   help_button = gtk_button_new_from_stock(GTK_STOCK_HELP);
 
   /* Button tooltips */
-  send_tip=gtk_tooltips_new();
+  send_tip = gtk_tooltips_new();
   gtk_tooltips_set_tip(send_tip,send_button, "Send problem report", "");
   gtk_tooltips_enable(send_tip);
 
-  help_tip=gtk_tooltips_new();
+  help_tip = gtk_tooltips_new();
   gtk_tooltips_set_tip(help_tip,help_button, "Show online help", "");
   gtk_tooltips_enable(help_tip);
 
-  about_tip=gtk_tooltips_new();
+  about_tip = gtk_tooltips_new();
   gtk_tooltips_set_tip(about_tip,about_button, "About this program", "");
   gtk_tooltips_enable(about_tip);
 
-  quit_tip=gtk_tooltips_new();
+  quit_tip = gtk_tooltips_new();
   gtk_tooltips_set_tip(quit_tip,quit_button, "Exit this program", "");
   gtk_tooltips_enable(quit_tip);
 
-  h_buttons=gtk_hbutton_box_new();
+  h_buttons = gtk_hbutton_box_new();
 
   gtk_box_pack_start(GTK_BOX(h_buttons), send_button, FALSE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(h_buttons), about_button, FALSE, FALSE, 0);
@@ -422,7 +421,7 @@ create_gtk_ui(char *included_file)
   type_vbox1 = gtk_vbox_new(TRUE, 2);
   type_combo1 = gtk_combo_box_entry_new_text();
 
-  for(i=0;i<(sizeof(pr_severities)/sizeof(char *));i++) {
+  for(i=0; i<(sizeof(pr_severities)/sizeof(char *)); i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo1),
 			      pr_severities[i]);
@@ -444,7 +443,7 @@ create_gtk_ui(char *included_file)
   type_vbox2 = gtk_vbox_new(TRUE, 2);
   type_combo2 = gtk_combo_box_entry_new_text();
 
-  for(i=0;i<(sizeof(pr_priorities)/sizeof(char *));i++) {
+  for(i=0; i<(sizeof(pr_priorities)/sizeof(char *)); i++) {
 
     gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo2),
 			      pr_priorities[i]);
@@ -816,38 +815,48 @@ send_pressed( GtkWidget *widget, gpointer data)
 void 
 open_pressed( GtkWidget *widget, gpointer data)
 {
-  if(open_menu_up == 0) {
+  GtkWidget *file_dialog;
+  char *selected_filename;
+  GtkWidget *error_dialog;
+  char file_warning[1024];
 
-    fix_filsel=gtk_file_selection_new("Select file to be included the Fix field");
-    g_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)->ok_button),
-		     "clicked",
-		     G_CALLBACK(select_ok),
-		     (gpointer) fix_filsel);
+  file_dialog = gtk_file_chooser_dialog_new("Select file to be included in the Fix field",
+					    GTK_WINDOW(window),
+					    GTK_FILE_CHOOSER_ACTION_OPEN,
+					    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					    NULL);
 
-    g_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)),
-		     "delete_event",
-		     G_CALLBACK(select_cancelled), 
-		     NULL);
+  if(gtk_dialog_run(GTK_DIALOG(file_dialog)) == GTK_RESPONSE_ACCEPT) {
 
-    g_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)),
-		     "destroy",
-		     G_CALLBACK(select_cancelled), 
-		     NULL);
+    selected_filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_dialog));
 
-    g_signal_connect_swapped(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)->ok_button),
-			     "clicked",
-			     G_CALLBACK(select_cancelled), 
-			     (gpointer) fix_filsel); 
+    fix_buffer = load_file(selected_filename);
 
-    g_signal_connect_swapped(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)->cancel_button),
-			     "clicked",
-			     G_CALLBACK(select_cancelled),
-			     (gpointer) fix_filsel); 
+    g_free(selected_filename);
 
-    gtk_widget_show(fix_filsel);
+    if(fix_buffer != NULL) {
 
-    open_menu_up = 1;
+      gtk_text_buffer_insert_at_cursor(fix_buffer1, fix_buffer, -1);
+      free(fix_buffer);
+
+    } else {
+
+      snprintf(file_warning, 1024, "Unable to read: %s", selected_filename);
+      error_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+					    GTK_DIALOG_DESTROY_WITH_PARENT,
+					    GTK_MESSAGE_ERROR,
+					    GTK_BUTTONS_OK,
+					    file_warning);
+      gtk_dialog_run(GTK_DIALOG(error_dialog));
+      gtk_widget_destroy(error_dialog);
+
+    }
+
   }
+
+  gtk_widget_destroy(file_dialog);
+
 }
 
 void 
@@ -861,49 +870,6 @@ clear_fix_pressed( GtkWidget *widget, gpointer data)
    */
   memset(drag_dupe, 0, 1024);
 }
-
-void
-select_ok( GtkWidget *widget, gpointer data)
-{
-  char *selected_filename;
-  GtkWidget *file_dialog;
-  char file_warning[1024];
-
-  open_menu_up=0;
-
-  selected_filename = (char *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fix_filsel));
-
-  gtk_widget_hide(fix_filsel);
-  gtk_widget_destroy(fix_filsel);
-
-  fix_buffer = load_file(selected_filename);
-  if(fix_buffer != NULL) {
-
-    gtk_text_buffer_insert_at_cursor(fix_buffer1, fix_buffer, -1);
-    free(fix_buffer);
-
-  } else {
-
-    snprintf(file_warning,1024,"Unable to read: %s",selected_filename);
-    file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
-					 GTK_DIALOG_DESTROY_WITH_PARENT,
-					 GTK_MESSAGE_ERROR,
-					 GTK_BUTTONS_OK,
-					 file_warning);
-    gtk_dialog_run(GTK_DIALOG(file_dialog));
-    gtk_widget_destroy(file_dialog);
-
-  }
-}
-
-void
-select_cancelled( GtkWidget *widget, gpointer data)
-{
-  gtk_widget_hide(fix_filsel);
-  gtk_widget_destroy(fix_filsel);
-  open_menu_up = 0;
-}
-
 
 void fill_pr(PROBLEM_REPORT *mypr)
 {
