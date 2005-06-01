@@ -39,6 +39,7 @@
 #include <time.h>
 extern char *tzname[2];
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "gtk-send-pr.h"
@@ -110,6 +111,9 @@ GtkWidget *auth_passentry;
 int open_menu_up;
 int gsp_auth_done;
 GSP_AUTH *auth_info;
+
+char auth_username[1024];
+char auth_password[1024];
 
 int 
 create_gtk_ui(char *included_file)
@@ -189,6 +193,8 @@ create_gtk_ui(char *included_file)
 
   open_menu_up=0;
   gsp_auth_done=FALSE;
+  memset(auth_username, 0, 1024);
+  memset(auth_password, 0, 1024);
 
   /* Let's go */
 
@@ -1049,70 +1055,60 @@ int
 gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 {
 
-  int status;
-  pid_t my_pid;
-
-
   auth_info=my_auth;
   gsp_auth_done=FALSE;
 
-  my_pid=fork();
+  auth_window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_modal(GTK_WINDOW(auth_window), TRUE);
+  gtk_window_set_title(GTK_WINDOW(auth_window), "SMTP Auth");
+  gtk_window_set_resizable(GTK_WINDOW(auth_window), TRUE);
+  gtk_window_set_transient_for(GTK_WINDOW(auth_window), GTK_WINDOW(window));
+  gtk_window_set_destroy_with_parent(GTK_WINDOW(auth_window), TRUE);
 
-  /* Fork process */
-  /* Child */
-  if(my_pid==0) {
+  g_signal_connect(GTK_OBJECT(auth_window), "delete_event",
+		   GTK_SIGNAL_FUNC(delete_event), NULL);
 
-    auth_window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_modal(GTK_WINDOW(auth_window), TRUE);
-    gtk_window_set_title(GTK_WINDOW(auth_window), "SMTP Auth");
-    gtk_window_set_resizable(GTK_WINDOW(auth_window), TRUE);
-    gtk_window_set_transient_for(GTK_WINDOW(auth_window), GTK_WINDOW(window));
-    gtk_window_set_destroy_with_parent(GTK_WINDOW(auth_window), TRUE);
+  g_signal_connect(GTK_OBJECT(auth_window), "destroy",
+		   GTK_SIGNAL_FUNC(destroy), NULL);
 
-    g_signal_connect(GTK_OBJECT(auth_window), "delete_event",
-		     GTK_SIGNAL_FUNC(delete_event), NULL);
+  auth_vbox=gtk_vbox_new(FALSE, 4);
 
-    g_signal_connect(GTK_OBJECT(auth_window), "destroy",
-		     GTK_SIGNAL_FUNC(destroy), NULL);
+  auth_label=gtk_label_new("\nSMTP server requires authentication\n");
 
-    auth_vbox=gtk_vbox_new(FALSE, 4);
+  auth_userframe=gtk_frame_new("User name");
+  auth_userentry=gtk_entry_new();
+  gtk_container_add(GTK_CONTAINER(auth_userframe), auth_userentry);
 
-    auth_label=gtk_label_new("\nSMTP server requires authentication\n");
+  auth_passframe=gtk_frame_new("Password");
+  auth_passentry=gtk_entry_new();
+  gtk_entry_set_visibility(GTK_ENTRY(auth_passentry), FALSE);
+  gtk_container_add(GTK_CONTAINER(auth_passframe), auth_passentry);
 
-    auth_userframe=gtk_frame_new("User name");
-    auth_userentry=gtk_entry_new();
-    gtk_container_add(GTK_CONTAINER(auth_userframe), auth_userentry);
+  auth_ok=gtk_button_new_from_stock(GTK_STOCK_OK);
 
-    auth_passframe=gtk_frame_new("Password");
-    auth_passentry=gtk_entry_new();
-    gtk_entry_set_visibility(GTK_ENTRY(auth_passentry), FALSE);
-    gtk_container_add(GTK_CONTAINER(auth_passframe), auth_passentry);
+  g_signal_connect(GTK_OBJECT(auth_ok), "clicked",
+		   GTK_SIGNAL_FUNC(auth_ok_pressed), NULL);
 
-    auth_ok=gtk_button_new_from_stock(GTK_STOCK_OK);
+  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_label, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_userframe, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_passframe, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(auth_vbox),auth_ok, FALSE, FALSE, 4);
 
-    g_signal_connect(GTK_OBJECT(auth_ok), "clicked",
-		     GTK_SIGNAL_FUNC(auth_ok_pressed), NULL);
+  gtk_box_set_homogeneous(GTK_BOX(auth_vbox), FALSE);
+  gtk_container_add(GTK_CONTAINER(auth_window), auth_vbox);
 
-    gtk_box_pack_start(GTK_BOX(auth_vbox),auth_label, FALSE, FALSE, 4);
-    gtk_box_pack_start(GTK_BOX(auth_vbox),auth_userframe, FALSE, FALSE, 4);
-    gtk_box_pack_start(GTK_BOX(auth_vbox),auth_passframe, FALSE, FALSE, 4);
-    gtk_box_pack_start(GTK_BOX(auth_vbox),auth_ok, FALSE, FALSE, 4);
+  gtk_widget_show(auth_window);
+  gtk_widget_show(auth_vbox);
+  gtk_widget_show(auth_label);
+  gtk_widget_show(auth_userframe);
+  gtk_widget_show(auth_userentry);
+  gtk_widget_show(auth_passframe);
+  gtk_widget_show(auth_passentry);
+  gtk_widget_show(auth_ok);
 
-    gtk_box_set_homogeneous(GTK_BOX(auth_vbox), FALSE);
-    gtk_container_add(GTK_CONTAINER(auth_window), auth_vbox);
+  while(gsp_auth_done!=TRUE) {
 
-    gtk_widget_show(auth_window);
-    gtk_widget_show(auth_vbox);
-    gtk_widget_show(auth_label);
-    gtk_widget_show(auth_userframe);
-    gtk_widget_show(auth_userentry);
-    gtk_widget_show(auth_passframe);
-    gtk_widget_show(auth_passentry);
-    gtk_widget_show(auth_ok);
-
-  } else {
-
-    wait(&status);
+    gtk_main_iteration();
 
   }
 
@@ -1124,10 +1120,11 @@ void
 auth_ok_pressed( GtkWidget *widget, gpointer data)
 {
 
-  auth_info->username=(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry));
-  auth_info->password=(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry));
+  strncpy(auth_username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)),1023);
+  strncpy(auth_password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)),1023);
+  auth_info->username=auth_username;
+  auth_info->password=auth_password;
   
-  printf("hola!\n");
   gtk_widget_hide(auth_window);
   gtk_widget_hide(auth_vbox);
   gtk_widget_hide(auth_label);
@@ -1137,17 +1134,15 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   gtk_widget_hide(auth_passentry);
   gtk_widget_hide(auth_ok);
 
-
   gtk_widget_destroy(auth_label);
-  gtk_widget_destroy(auth_userframe);
   gtk_widget_destroy(auth_userentry);
-  gtk_widget_destroy(auth_passframe);
+  gtk_widget_destroy(auth_userframe);
   gtk_widget_destroy(auth_passentry);
+  gtk_widget_destroy(auth_passframe);
   gtk_widget_destroy(auth_ok);
   gtk_widget_destroy(auth_vbox);
   gtk_widget_destroy(auth_window);
 
   gsp_auth_done=TRUE;
-
   
 }

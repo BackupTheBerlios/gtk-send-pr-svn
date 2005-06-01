@@ -46,10 +46,18 @@ extern char *tzname[2];
 #include "gtk_ui.h"
 #include "smtp.h"
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+
 void build_message(FILE *, PROBLEM_REPORT *, struct utsname *);
 int authinteract(auth_client_request_t request, char **result, int fields, void *arg);
 
 char global_smtp_error_msg[1024];
+GSP_AUTH *my_auth=NULL;
+
+extern int gsp_auth_done;
 	
 int
 send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
@@ -71,6 +79,10 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
   char my_smtp_server[1024];
   char my_recipient[1024];
   char buf[128];
+
+  my_auth=malloc(sizeof(GSP_AUTH));
+  my_auth->username=NULL;
+  my_auth->password=NULL;
 
   sprintf(tempfile, "/tmp/gtk-send-pr.XXXXXXXX");
   tempfd=mkstemp(tempfile);
@@ -108,7 +120,7 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
   smtp_set_header(message, "Message-Id", NULL);
   smtp_set_reverse_path(message, mypr->smtp_from);
   
-fp = fopen(tempfile, "r");
+  fp = fopen(tempfile, "r");
 
   smtp_set_message_fp(message, fp);
 
@@ -143,6 +155,7 @@ fp = fopen(tempfile, "r");
     fclose(fp);
     unlink(tempfile);
     auth_client_exit();
+    free(my_auth);
     return(0);
 
   }
@@ -199,30 +212,27 @@ int
 authinteract(auth_client_request_t request, char **result, int fields, void *arg)
 {
   int i;
-  GSP_AUTH my_auth;
-
-  my_auth.username=NULL;
-  my_auth.password=NULL;
 
   for(i=0; i<fields; i++) {
 
     if(request[i].flags & AUTH_PASS) {
 
-      if(my_auth.username==NULL || my_auth.password==NULL) {
+      if(gsp_auth_done!=TRUE) {
 
-	gsp_smtp_auth_dialog(&my_auth);
+	gsp_smtp_auth_dialog(my_auth);
 
       }
-      result[i] = my_auth.password;
+      result[i] = my_auth->password;
 
     } else if(request[i].flags & AUTH_USER) {
 
-      if(my_auth.username==NULL || my_auth.password==NULL) {
+      if(gsp_auth_done!=TRUE) {
 
-	gsp_smtp_auth_dialog(&my_auth);
+	gsp_smtp_auth_dialog(my_auth);
 
       }
-      result[i] = my_auth.username;
+
+      result[i] = my_auth->username;
 
     }
 
