@@ -9,9 +9,6 @@ modification, are permitted provided that the following conditions are met:
 	* Redistributions in binary form must reproduce the above copyright notice,
 	this list of conditions and the following disclaimer in the documentation 
 	and/or other materials provided with the distribution. 
-	* Neither the name of Miguel Mendez nor the names of his contributors
-	may be used to endorse or promote products derived from this software 
-	without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -35,23 +32,55 @@ $Id$
 #include <sys/mman.h>
 #include <fcntl.h>
 
-#if !defined(NO_GUI)
 #include <gtk/gtk.h>
-#endif
-
-#include "gtk-send-pr.h"
-
-#if !defined(NO_GUI)
 #include "gtk_ui.h"
-#endif
 
+
+void usage(void);
+
+	char *included_file=NULL;
 	
 int
 main(int argc, char **argv)
 {
+	int ch;
 	
+	while((ch = getopt(argc, argv, "avh")) != -1) {
+		
+		switch(ch) {
+			case 'a':
+					if(argc>2) {
+						included_file=argv[optind];
+					} else {
+						usage();
+					}
+					break;
+			case 'v':
+					printf("gtk-send-pr 0.2 \"Southern Sun\"\n"
+					"Copyright (c) 2003, Miguel Mendez."
+					" All rights reserved.\n");
+					exit(EXIT_SUCCESS);
+			case 'h':
+			default:
+					usage();
+		}
+	argc -= optind;
+	argv += optind;
+
+	}
+		
 	gtk_init (&argc, &argv);
 	
 	create_gtk_ui();
 	return(0);
+}
+
+void
+usage(void)
+{
+	printf("usage: gtk-send-pr [-a file] [-v] [-h]\n");
+	printf("\t-a file\tinclude file in the Fix: section\n");
+	printf("\t-v\tshow version and exit\n");
+	printf("\t-h\tshow this screen\n");
+	exit(EXIT_SUCCESS);
 }

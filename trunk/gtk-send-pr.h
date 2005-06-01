@@ -9,9 +9,6 @@ modification, are permitted provided that the following conditions are met:
 	* Redistributions in binary form must reproduce the above copyright notice,
 	this list of conditions and the following disclaimer in the documentation 
 	and/or other materials provided with the distribution. 
-	* Neither the name of Miguel Mendez nor the names of his contributors
-	may be used to endorse or promote products derived from this software 
-	without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,55 +25,42 @@ $Id$
 
 */
 
-#define GSP_VERSION "0.1"
+#define GSP_VERSION "0.2"
 
 typedef struct user_prfile {
 
 	char name[255];
 	char email[255];
 	char org[255];
+	char smtp[255];
+	int geom_x;
+	int geom_y;
 	
 } USER_PROFILE;
 
+typedef struct problem_report {
 
-						
-#if defined(__NetBSD__)
-char *pr_categories[]= { "bin", "install", "kern", "lib", "misc", "pkg", \
-					"port-acorn26", "port-acorn32", "port-algor", \
-					"port-alpha", "port-amiga", "port-arc", \
-					"port-arm"," port-arm32", "port-atari", \
-					"port-bebox", "port-cats", "port-cobalt", \
-					"port-dreamcast", "port-evbmips", "port-evbsh5", \
-					"port-hp300", "port-hp700", "port-hpcmips", \
-					"port-hpcsh", "port-hppa", "port-i386", \
-					"port-luna68k", "port-m68k", "port-mac68k", \
-					"port-macppc", "port-mips", "port-mvme68k", \
-					"port-mvmeppc", "port-news68k", "port-newsmips", \
-					"port-next68k", "port-ofppc", "port-pc532", \
-					"port-playstation2", "port-pmax", "port-powerpc", \
-					"port-prep", "port-sbmips", "port-sgimips", \
-					"port-sh3", "port-sh5", "port-shark", \
-					"port-sparc", "port-sparc64", "port-sun2", \
-					"port-sun3", "port-vax", "port-x68k", \
-					"port-x86_64", "security", "standards", \
-					"toolchain", "xsrc", "y2k"};
-
-char *pr_severities[]= { "non-critical", "serious", "critical" };
-char *pr_priorities[]= { "low", "medium", "high" };
-char *pr_classes[]= { "sw-bug", "doc-bug", "change-request", "support" };
-char default_to[]="gnats-bugs@gnats.netbsd.org";
-char default_sub_id[]="net";
-
-#elif defined(__FreeBSD__)
-
-
-#endif
-
-#define KNOB_IS_YES 1
-#define KNOB_IS_NO 0
-#define IS_KNOB 1
-#define NOT_KNOB 0
-#define MODIFIED_NO 0
-#define MODIFIED_YES 1
-
+	char *smtp_server;
+	char *smtp_from;
+	char *smtp_to;
+	char *smtp_cc[64];
+	char *smtp_cc_text;
+	int  smtp_cc_num;
+	char *smtp_subject;
+	char *smtp_msgid;
+	char *submitter_id;
+	char *originator;
+	char *organization;
+	char *synopsis;
+	char *severity;
+	char *priority;
+	char *category;
+	char *class;
+	char *release;
+	char *environment;
+	char *description;
+	char *how_to_repeat;
+	char *fix;
+	
+} PROBLEM_REPORT;
 

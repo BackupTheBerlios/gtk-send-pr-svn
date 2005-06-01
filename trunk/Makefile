@@ -3,27 +3,16 @@
 #
 LOCALBASE?=/usr/local
 
+CFLAGS+= -Wall -g -DGTK_DISABLE_DEPRECATED `pkg-config gtk+-2.0 --cflags` `libesmtp-config --cflags`
 
-.if !defined(NO_GUI)
-CFLAGS+= -Wall -g -DGTK_DISABLE_DEPRECATED `pkg-config gtk+-2.0 --cflags`
-.else 
-CFLAGS+= -Wall -DNO_GUI
-.endif
+LDFLAGS+= `pkg-config gtk+-2.0 --libs` `libesmtp-config --libs`
 
-
-.if !defined(NO_GUI)
-LDFLAGS+= `pkg-config gtk+-2.0 --libs` -lncurses
-.endif
 
 .if defined(WITH_EFENCE)
 LDFLAGS+= -L${LOCALBASE}/lib -lefence
 .endif
 
-.if !defined (NO_GUI)
-OBJECTS= main.o gtk_ui.o
-.else 
-OBJECTS= main.o
-.endif
+OBJECTS= main.o gtk_ui.o smtp.o
 
 all:	$(OBJECTS)
 	$(CC) $(LDFLAGS) -o gtk-send-pr $(OBJECTS)
