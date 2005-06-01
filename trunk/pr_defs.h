@@ -38,6 +38,7 @@ char *pr_severities[]= { "non-critical", "serious", "critical" };
 char *pr_priorities[]= { "low", "medium", "high" };
 char *pr_classes[]= { "sw-bug", "doc-bug", "change-request", "update", "maintainer-update"};
 char default_to[]="FreeBSD-gnats-submit@freebsd.org";
+char default_rcpt[]="FreeBSD gnats submit";
 char default_sub_id[]="current-users";
 
 #else
@@ -66,6 +67,7 @@ char *pr_severities[]= { "non-critical", "serious", "critical" };
 char *pr_priorities[]= { "low", "medium", "high" };
 char *pr_classes[]= { "sw-bug", "doc-bug", "change-request", "support" };
 char default_to[]="gnats-bugs@gnats.netbsd.org";
+char default_rcpt[]="gnats bugs";
 char default_sub_id[]="net";
 
 #endif

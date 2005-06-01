@@ -43,9 +43,11 @@ extern char *tzname[2];
 #include <libesmtp.h>
 
 #include "gtk-send-pr.h"
+#include "gtk_ui.h"
 #include "smtp.h"
 
-void build_message(FILE *,PROBLEM_REPORT *,struct utsname *);
+void build_message(FILE *, PROBLEM_REPORT *, struct utsname *);
+int authinteract(auth_client_request_t request, char **result, int fields, void *arg);
 
 char global_smtp_error_msg[1024];
 	
@@ -56,55 +58,72 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
   smtp_message_t message;
   smtp_recipient_t recipient;
   const smtp_status_t *status;
-  char *from = NULL;
+  auth_context_t authctx;
+  int noauth = 0;
   char *host = NULL;
   int i;
 
   enum notify_flags notify = Notify_SUCCESS|Notify_FAILURE;
   FILE *fp;
   char tempfile[1024];
-  int	 tempfd;
+  int  tempfd;
 
   char my_smtp_server[1024];
+  char my_recipient[1024];
   char buf[128];
 
-  sprintf(tempfile,"/tmp/gtk-send-pr.XXXXXXXX");
+  sprintf(tempfile, "/tmp/gtk-send-pr.XXXXXXXX");
   tempfd=mkstemp(tempfile);
-  fp=fdopen(tempfd,"w");
+  fp=fdopen(tempfd, "w");
 
-  build_message(fp,mypr,my_uname);
+  build_message(fp, mypr, my_uname);
 
   fclose(fp);
 
-  auth_client_init ();
+  auth_client_init();
   session = smtp_create_session();
   message = smtp_add_message(session);
 
-
-  snprintf(my_smtp_server,1024,"%s:25",mypr->smtp_server);
+  snprintf(my_smtp_server, 1024, "%s:25", mypr->smtp_server);
 
   host=my_smtp_server;
 
   smtp_set_server(session, host);
-  smtp_set_reverse_path(message, from);
 
-  smtp_set_header(message, "From",mypr->originator,mypr->smtp_from);
-  smtp_set_header(message, "To",NULL,mypr->smtp_to);
-  smtp_set_header(message, "Subject",mypr->smtp_subject);
+  i=smtp_starttls_enable(session, Starttls_DISABLED);
 
-  fp = fopen (tempfile, "r");
+  authctx = auth_create_context();
+  auth_set_mechanism_flags(authctx, AUTH_PLUGIN_PLAIN, 0);
+  auth_set_interact_cb(authctx, authinteract, NULL);
 
-  smtp_set_message_fp (message, fp);
+  if(!noauth) {
 
-  recipient = smtp_add_recipient (message,mypr->smtp_to);
-  smtp_dsn_set_notify (recipient, notify);
+    smtp_auth_set_context(session, authctx);
+
+  }
+
+  smtp_set_header(message, "From", mypr->originator, mypr->smtp_from);
+  smtp_set_header(message, "To", mypr->smtp_rcpt, mypr->smtp_to);
+  smtp_set_header(message, "Subject", mypr->smtp_subject);
+  smtp_set_header(message, "Message-Id", NULL);
+  smtp_set_reverse_path(message, mypr->smtp_from);
+  
+fp = fopen(tempfile, "r");
+
+  smtp_set_message_fp(message, fp);
+
+  /* Recipient must be in RFC2821 format */
+  snprintf(my_recipient,1024,"\"%s\" <%s>",mypr->smtp_rcpt,mypr->smtp_to);
+  recipient = smtp_add_recipient(message, my_recipient);
+  smtp_dsn_set_notify(recipient, notify);
 
   if((mypr->smtp_cc_num)>0) {
 
     for(i=0;i<(mypr->smtp_cc_num);i++) {
 
       smtp_set_header(message, "CC",NULL, mypr->smtp_cc[i]);
-      recipient = smtp_add_recipient (message,mypr->smtp_cc[i]);
+      snprintf(my_recipient,1024,"<%s>",mypr->smtp_cc[i]);
+      recipient = smtp_add_recipient (message,my_recipient);
       smtp_dsn_set_notify (recipient, notify);			
 
     }
@@ -113,17 +132,19 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
   if (!smtp_start_session (session)) {
 
     snprintf(global_smtp_error_msg,1024,"SMTP server problem : %s\n",
-	     smtp_strerror (smtp_errno (), buf, sizeof buf));
+	     smtp_strerror(smtp_errno(), buf, sizeof buf));
     return(-1);
 
   } else {
 
-    status = smtp_message_transfer_status (message);
-    smtp_destroy_session (session);
-    fclose (fp);
+    status = smtp_message_transfer_status(message);
+    smtp_destroy_session(session);
+    auth_destroy_context(authctx);
+    fclose(fp);
     unlink(tempfile);
     auth_client_exit();
     return(0);
+
   }
 
 }
@@ -132,12 +153,9 @@ void
 build_message(FILE *fp,PROBLEM_REPORT *mypr,struct utsname *my_uname)
 {
 
-  srandomdev();
-
   fprintf(fp,"Return-Path: <%s>\r\n",mypr->smtp_from);
   fprintf(fp,"Subject: %s\r\n", mypr->smtp_subject);
   fprintf(fp,"MIME-Version: 1.0\r\n");
-  fprintf(fp,"Message-Id: <%i.%lx@%s>\r\n",(int) time(NULL),random(),my_uname->nodename);
   fprintf(fp,"Content-Type: text/plain;\r\n");
   fprintf(fp,"  charset=iso-8859-1\r\n");
   fprintf(fp,"Content-Transfer-Encoding: 7bit\r\n");
@@ -175,4 +193,42 @@ build_message(FILE *fp,PROBLEM_REPORT *mypr,struct utsname *my_uname)
   fprintf(fp,"%s\r\n",mypr->fix);
   fprintf(fp,"\r\n\r\n");	
 
+}
+
+int 
+authinteract(auth_client_request_t request, char **result, int fields, void *arg)
+{
+  int i;
+  GSP_AUTH my_auth;
+
+  my_auth.username=NULL;
+  my_auth.password=NULL;
+
+  for(i=0; i<fields; i++) {
+
+    if(request[i].flags & AUTH_PASS) {
+
+      if(my_auth.username==NULL || my_auth.password==NULL) {
+
+	gsp_smtp_auth_dialog(&my_auth);
+
+      }
+      result[i] = my_auth.password;
+
+    } else if(request[i].flags & AUTH_USER) {
+
+      if(my_auth.username==NULL || my_auth.password==NULL) {
+
+	gsp_smtp_auth_dialog(&my_auth);
+
+      }
+      result[i] = my_auth.username;
+
+    }
+
+    if (result[i] == NULL) return 0;
+
+  }
+
+  return 1;
 }

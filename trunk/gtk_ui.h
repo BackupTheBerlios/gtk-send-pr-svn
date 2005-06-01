@@ -26,5 +26,5 @@ $Id$
 */
 
 int create_gtk_ui(char *);
-
+int gsp_smtp_auth_dialog(GSP_AUTH *);
 

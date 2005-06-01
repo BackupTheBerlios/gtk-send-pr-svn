@@ -888,6 +888,7 @@ void fill_pr(PROBLEM_REPORT *mypr)
   mypr->smtp_server=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
   mypr->smtp_from=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
   mypr->smtp_to=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry1));
+  mypr->smtp_rcpt=default_rcpt;
   mypr->smtp_subject=(char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
   mypr->submitter_id=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry5));
   mypr->originator=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry6));
@@ -1027,5 +1028,13 @@ update_profile(void)
 
   tmp_entry=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
   strncpy(my_profile.smtp,tmp_entry,255);
+
+}
+
+int
+gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
+{
+
+  return 0;
 
 }
