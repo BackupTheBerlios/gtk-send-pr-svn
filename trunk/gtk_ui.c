@@ -166,15 +166,19 @@ create_gtk_ui(char *included_file)
   GtkWidget	*email_frame8;
 
   GtkWidget	*type_vbox;
+  GtkWidget     *type_vbox1;
+  GtkWidget     *type_vbox2;
+  GtkWidget     *type_vbox3;
+  GtkWidget     *type_vbox4;
   GtkWidget	*type_frame1;
   GtkWidget	*type_frame2;
-  GList		*type_items1 = NULL;
+  //  GList		*type_items1 = NULL;
   GtkWidget	*type_frame3;
-  GList		*type_items2 = NULL;
+  //  GList		*type_items2 = NULL;
   GtkWidget	*type_frame4;
-  GList		*type_items3 = NULL;
+  //  GList		*type_items3 = NULL;
   GtkWidget	*type_frame5;
-  GList		*type_items4 = NULL;
+  //  GList		*type_items4 = NULL;
   GtkWidget	*system_vbox;
   GtkWidget	*system_frame1;		
   GtkWidget	*system_frame2;
@@ -241,7 +245,7 @@ create_gtk_ui(char *included_file)
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
-  gtk_window_set_title(GTK_WINDOW(window), "GTK Send-PR " GSP_VERSION);
+  gtk_window_set_title(GTK_WINDOW(window), "GTK+ Send-PR " GSP_VERSION);
   gtk_window_set_default_size(GTK_WINDOW(window), my_profile.geom_x, my_profile.geom_y);
 
   /* Set the icon */
@@ -310,22 +314,22 @@ create_gtk_ui(char *included_file)
   gtk_box_pack_start(GTK_BOX(h_buttons), quit_button, FALSE, FALSE, 0);
 
   g_signal_connect(GTK_OBJECT(window), "delete_event",
-		   GTK_SIGNAL_FUNC(delete_event), NULL);
+		   G_CALLBACK(delete_event), NULL);
 
   g_signal_connect(GTK_OBJECT(window), "destroy",
-		   GTK_SIGNAL_FUNC(destroy), NULL);
+		   G_CALLBACK(destroy), NULL);
 
   g_signal_connect(GTK_OBJECT(quit_button), "clicked",
-		   GTK_SIGNAL_FUNC(quit_pressed), NULL);
+		   G_CALLBACK(quit_pressed), NULL);
 
   g_signal_connect(GTK_OBJECT(about_button), "clicked",
-		   GTK_SIGNAL_FUNC(about_pressed), NULL);
+		   G_CALLBACK(about_pressed), NULL);
 
   g_signal_connect(GTK_OBJECT(send_button), "clicked",
-		   GTK_SIGNAL_FUNC(send_pressed), NULL);
+		   G_CALLBACK(send_pressed), NULL);
 
   g_signal_connect(GTK_OBJECT(help_button), "clicked",
-		   GTK_SIGNAL_FUNC(help_pressed), NULL);				
+		   G_CALLBACK(help_pressed), NULL);				
 
   vbox1 = gtk_vbox_new(FALSE, 2);
   hseparator1 = gtk_hseparator_new ();
@@ -399,127 +403,145 @@ create_gtk_ui(char *included_file)
   /* PR type code */
   type_vbox = gtk_vbox_new(FALSE, 2);
 
-  type_frame1=gtk_frame_new(" Synopsis ");
-  type_entry1=gtk_entry_new();
+  type_frame1 = gtk_frame_new(" Synopsis ");
+  type_entry1 = gtk_entry_new();
   gtk_entry_set_max_length(GTK_ENTRY(type_entry1), 255);
 
   /* Severity */
-  type_frame2=gtk_frame_new(" Severity ");
+  type_frame2 = gtk_frame_new(" Severity ");
+  type_vbox1 = gtk_vbox_new(TRUE, 2);
+  type_combo1 = gtk_combo_box_entry_new_text();
 
   for(i=0;i<(sizeof(pr_severities)/sizeof(char *));i++) {
 
-    type_items1 = g_list_append (type_items1, pr_severities[i]);
+    //    type_items1 = g_list_append (type_items1, pr_severities[i]);
+    gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo1),
+			      pr_severities[i]);
 
   }
 
-  type_combo1 = gtk_combo_new();
-  gtk_combo_set_popdown_strings (GTK_COMBO(type_combo1), type_items1);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo1), 0);
+  //  gtk_combo_set_popdown_strings (GTK_COMBO(type_combo1), type_items1);
+
+  gtk_box_pack_start(GTK_BOX(type_vbox1), type_combo1, FALSE, FALSE, 0);
 
   gtk_container_add(GTK_CONTAINER(type_frame1), type_entry1);
-  gtk_container_add(GTK_CONTAINER(type_frame2), type_combo1);
+  gtk_container_add(GTK_CONTAINER(type_frame2), type_vbox1);
 
   gtk_box_pack_start(GTK_BOX(type_vbox), type_frame1, TRUE, TRUE, 4);
   gtk_box_pack_start(GTK_BOX(type_vbox), type_frame2, TRUE, TRUE, 4);
 
   /* Priority */
-  type_frame3=gtk_frame_new(" Priority ");
+  type_frame3 = gtk_frame_new(" Priority ");
+  type_vbox2 = gtk_vbox_new(TRUE, 2);
+  type_combo2 = gtk_combo_box_entry_new_text();
 
   for(i=0;i<(sizeof(pr_priorities)/sizeof(char *));i++) {
 
-    type_items2 = g_list_append (type_items2, pr_priorities[i]);
+    //    type_items2 = g_list_append (type_items2, pr_priorities[i]);
+    gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo2),
+			      pr_priorities[i]);
 
   }
 
-  type_combo2 = gtk_combo_new();
-  gtk_combo_set_popdown_strings(GTK_COMBO (type_combo2), type_items2);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo2), 0);
+  gtk_box_pack_start(GTK_BOX(type_vbox2), type_combo2, FALSE, FALSE, 0);
 
-  gtk_container_add(GTK_CONTAINER(type_frame3), type_combo2);
+  gtk_container_add(GTK_CONTAINER(type_frame3), type_vbox2);
   gtk_box_pack_start(GTK_BOX(type_vbox), type_frame3, TRUE, TRUE, 4);
 
   /* Category */
-  type_frame4=gtk_frame_new(" Category ");
+  type_frame4 = gtk_frame_new(" Category ");
+  type_vbox3 = gtk_vbox_new(TRUE, 2);
+  type_combo3 = gtk_combo_box_entry_new_text();
 
   for(i=0;i<(sizeof(pr_categories)/sizeof(char *));i++) {
 
-    type_items3 = g_list_append (type_items3, pr_categories[i]);
+    //    type_items3 = g_list_append (type_items3, pr_categories[i]);
+    gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo3),
+			      pr_categories[i]);
 
   }
 
-  type_combo3 = gtk_combo_new();
-  gtk_combo_set_popdown_strings(GTK_COMBO (type_combo3), type_items3);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), 0);
+  gtk_box_pack_start(GTK_BOX(type_vbox3), type_combo3, FALSE, FALSE, 0);
 
-  gtk_container_add(GTK_CONTAINER(type_frame4), type_combo3);
+  gtk_container_add(GTK_CONTAINER(type_frame4), type_vbox3);
   gtk_box_pack_start(GTK_BOX(type_vbox), type_frame4, TRUE, TRUE, 4);
 
   /* Class */
-  type_frame5=gtk_frame_new(" Class ");
+  type_frame5 = gtk_frame_new(" Class ");
+  type_vbox4 = gtk_vbox_new(TRUE, 2);
+  type_combo4 = gtk_combo_box_entry_new_text();
 
   for(i=0;i<(sizeof(pr_classes)/sizeof(char *));i++) {
 
-    type_items4 = g_list_append (type_items4, pr_classes[i]);
+    //    type_items4 = g_list_append (type_items4, pr_classes[i]);
+    gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo4),
+			      pr_classes[i]);
 
-  }	
+  }
 
-  type_combo4 = gtk_combo_new();
-  gtk_combo_set_popdown_strings(GTK_COMBO (type_combo4), type_items4);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo4), 0);
+  gtk_box_pack_start(GTK_BOX(type_vbox4), type_combo4, FALSE, FALSE, 0);
 
-  gtk_container_add(GTK_CONTAINER(type_frame5), type_combo4);
+  gtk_container_add(GTK_CONTAINER(type_frame5), type_vbox4);
   gtk_box_pack_start(GTK_BOX(type_vbox), type_frame5, TRUE, TRUE, 4);
 
   /* System info */
   system_vbox = gtk_vbox_new(FALSE, 2);	
 
-  system_frame1=gtk_frame_new(" Release ");	
+  system_frame1 = gtk_frame_new(" Release ");	
 
-  system_entry1=gtk_entry_new();
+  system_entry1 = gtk_entry_new();
   gtk_entry_set_max_length(GTK_ENTRY(system_entry1), 255);
   gtk_entry_set_text(GTK_ENTRY(system_entry1), uname_srm);
 
   /* Environment */
 
-  system_frame2=gtk_frame_new(" Environment ");
+  system_frame2 = gtk_frame_new(" Environment ");
 
   system_view1 = gtk_text_view_new();
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(system_view1), GTK_WRAP_CHAR);
   system_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(system_view1));
   gtk_text_buffer_set_text(system_buffer1, uname_snrvm, -1);
 
-  scrolled_window1=gtk_scrolled_window_new(NULL, NULL);
+  scrolled_window1 = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window1), 10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window1),
-				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window1),
+				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window1)
 					, system_view1);
 
-  gtk_container_add(GTK_CONTAINER (system_frame1), system_entry1);
-  gtk_container_add(GTK_CONTAINER (system_frame2), scrolled_window1);
+  gtk_container_add(GTK_CONTAINER(system_frame1), system_entry1);
+  gtk_container_add(GTK_CONTAINER(system_frame2), scrolled_window1);
 
-  gtk_box_pack_start(GTK_BOX (system_vbox), system_frame1, FALSE, FALSE, 4);
-  gtk_box_pack_start(GTK_BOX (system_vbox), system_frame2, TRUE, TRUE, 4);
+  gtk_box_pack_start(GTK_BOX(system_vbox), system_frame1, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(system_vbox), system_frame2, TRUE, TRUE, 4);
 
   /* PR details */
   details_vbox = gtk_vbox_new (FALSE, 2);	
-  details_frame1=gtk_frame_new(" Description ");
+  details_frame1 = gtk_frame_new(" Description ");
 
-  details_view1 = gtk_text_view_new ();
+  details_view1 = gtk_text_view_new();
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(details_view1), GTK_WRAP_CHAR);
 
-  scrolled_window2=gtk_scrolled_window_new(NULL, NULL);
+  scrolled_window2 = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window2), 10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window2),
-				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window2),
+				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window2)
 					, details_view1);
 
-  details_frame2=gtk_frame_new(" How-To-Repeat ");
+  details_frame2 = gtk_frame_new(" How-To-Repeat ");
 
-  details_view2 = gtk_text_view_new ();
+  details_view2 = gtk_text_view_new();
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(details_view2), GTK_WRAP_CHAR);
 
-  scrolled_window3=gtk_scrolled_window_new(NULL, NULL);
+  scrolled_window3 = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window3), 10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window3),
-				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window3),
+				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window3)
 					, details_view2);
 
@@ -530,10 +552,10 @@ create_gtk_ui(char *included_file)
   gtk_box_pack_start(GTK_BOX(details_vbox), details_frame2, TRUE, TRUE, 4);
 
   /* Fix */
-  fix_vbox = gtk_vbox_new (FALSE, 2);
-  fix_frame=gtk_frame_new(" Fix (You can drag and drop text files here)");
+  fix_vbox = gtk_vbox_new(FALSE, 2);
+  fix_frame = gtk_frame_new(" Fix (You can drag and drop text files here)");
 
-  fix_view = gtk_text_view_new ();
+  fix_view = gtk_text_view_new();
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(fix_view), GTK_WRAP_CHAR);
 
   /* Drag and drop support */
@@ -542,8 +564,8 @@ create_gtk_ui(char *included_file)
 		    target_table, n_targets - 1, /* no rootwin */
 		    GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
-  g_signal_connect (fix_view, "drag_data_received",
-                    G_CALLBACK( fix_view_drag_data_received), NULL);
+  g_signal_connect(fix_view, "drag_data_received",
+		   G_CALLBACK( fix_view_drag_data_received), NULL);
 
   fix_buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
 
@@ -559,13 +581,13 @@ create_gtk_ui(char *included_file)
     } else {
 
       snprintf(file_warning,1024,"Unable to read: %s",included_file);
-      file_dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-					    GTK_DIALOG_DESTROY_WITH_PARENT,
-					    GTK_MESSAGE_ERROR,
-					    GTK_BUTTONS_OK,
-					    file_warning);
-      gtk_dialog_run (GTK_DIALOG (file_dialog));
-      gtk_widget_destroy (file_dialog);
+      file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+					   GTK_DIALOG_DESTROY_WITH_PARENT,
+					   GTK_MESSAGE_ERROR,
+					   GTK_BUTTONS_OK,
+					   file_warning);
+      gtk_dialog_run(GTK_DIALOG(file_dialog));
+      gtk_widget_destroy(file_dialog);
 
     }
 
@@ -573,8 +595,8 @@ create_gtk_ui(char *included_file)
 
   scrolled_window4 = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window4), 10);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window4),
-				  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window4),
+				 GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window4)
 					, fix_view);
 
@@ -584,12 +606,12 @@ create_gtk_ui(char *included_file)
 
   fix_button1 = gtk_button_new_from_stock(GTK_STOCK_OPEN);
   fix_tip1=gtk_tooltips_new();
-  gtk_tooltips_set_tip(fix_tip1,fix_button1,"Insert a file at cursor location","");
+  gtk_tooltips_set_tip(fix_tip1,fix_button1,"Insert a file at cursor location", "");
   gtk_tooltips_enable(fix_tip1);
 
   fix_button2 = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
   fix_tip2=gtk_tooltips_new();
-  gtk_tooltips_set_tip(fix_tip2,fix_button2,"Clear the Fix buffer","");
+  gtk_tooltips_set_tip(fix_tip2,fix_button2,"Clear the Fix buffer", "");
   gtk_tooltips_enable(fix_tip2);
 
   g_signal_connect(GTK_OBJECT(fix_button1), "clicked",
@@ -619,97 +641,97 @@ create_gtk_ui(char *included_file)
   gtk_box_set_homogeneous(GTK_BOX(vbox1), FALSE);
   gtk_container_add(GTK_CONTAINER(window), vbox1);
 
-  gtk_widget_show(mynotebook);
-  gtk_widget_show(vbox1);
+/*   gtk_widget_show(mynotebook); */
+/*   gtk_widget_show(vbox1); */
 
-  gtk_widget_show(email_frame1);
-  gtk_widget_show(email_entry1);
+/*   gtk_widget_show(email_frame1); */
+/*   gtk_widget_show(email_entry1); */
 
-  gtk_widget_show(email_frame2);
-  gtk_widget_show(email_entry2);
+/*   gtk_widget_show(email_frame2); */
+/*   gtk_widget_show(email_entry2); */
 
-  gtk_widget_show(email_frame3);
-  gtk_widget_show(email_entry3);
+/*   gtk_widget_show(email_frame3); */
+/*   gtk_widget_show(email_entry3); */
 
-  gtk_widget_show(email_frame4);
-  gtk_widget_show(email_entry4);				
+/*   gtk_widget_show(email_frame4); */
+/*   gtk_widget_show(email_entry4);				 */
 
-  gtk_widget_show(email_frame5);
-  gtk_widget_show(email_entry5);
+/*   gtk_widget_show(email_frame5); */
+/*   gtk_widget_show(email_entry5); */
 
-  gtk_widget_show(email_frame6);
-  gtk_widget_show(email_entry6);	
+/*   gtk_widget_show(email_frame6); */
+/*   gtk_widget_show(email_entry6);	 */
 
-  gtk_widget_show(email_frame7);
-  gtk_widget_show(email_entry7);
+/*   gtk_widget_show(email_frame7); */
+/*   gtk_widget_show(email_entry7); */
 
-  gtk_widget_show(email_frame8);
-  gtk_widget_show(email_entry8);
+/*   gtk_widget_show(email_frame8); */
+/*   gtk_widget_show(email_entry8); */
 
-  gtk_widget_show(email_vbox);
+/*   gtk_widget_show(email_vbox); */
 
-  gtk_widget_show(type_frame1);
-  gtk_widget_show(type_entry1);	
+/*   gtk_widget_show(type_frame1); */
+/*   gtk_widget_show(type_entry1);	 */
 
-  gtk_widget_show(type_frame2);
-  gtk_widget_show(type_combo1);
+/*   gtk_widget_show(type_frame2); */
+/*   gtk_widget_show(type_combo1); */
 
-  gtk_widget_show(type_frame3);
-  gtk_widget_show(type_combo2);
+/*   gtk_widget_show(type_frame3); */
+/*   gtk_widget_show(type_combo2); */
 
-  gtk_widget_show(type_frame4);
-  gtk_widget_show(type_combo3);	
+/*   gtk_widget_show(type_frame4); */
+/*   gtk_widget_show(type_combo3);	 */
 
-  gtk_widget_show(type_frame5);
-  gtk_widget_show(type_combo4);
+/*   gtk_widget_show(type_frame5); */
+/*   gtk_widget_show(type_combo4); */
 	
-  gtk_widget_show(type_vbox);
+/*   gtk_widget_show(type_vbox); */
 
-  gtk_widget_show(system_frame1);
-  gtk_widget_show(system_entry1);
+/*   gtk_widget_show(system_frame1); */
+/*   gtk_widget_show(system_entry1); */
 
-  gtk_widget_show(system_frame2);
-  gtk_widget_show(system_view1);
-  gtk_widget_show(scrolled_window1);
+/*   gtk_widget_show(system_frame2); */
+/*   gtk_widget_show(system_view1); */
+/*   gtk_widget_show(scrolled_window1); */
 	
-  gtk_widget_show(system_vbox);
+/*   gtk_widget_show(system_vbox); */
 
-  gtk_widget_show(details_frame1);
-  gtk_widget_show(details_view1);
-  gtk_widget_show(scrolled_window2);
+/*   gtk_widget_show(details_frame1); */
+/*   gtk_widget_show(details_view1); */
+/*   gtk_widget_show(scrolled_window2); */
 
-  gtk_widget_show(details_frame2);
-  gtk_widget_show(details_view2);
-  gtk_widget_show(scrolled_window3);
+/*   gtk_widget_show(details_frame2); */
+/*   gtk_widget_show(details_view2); */
+/*   gtk_widget_show(scrolled_window3); */
 
-  gtk_widget_show(details_vbox);
+/*   gtk_widget_show(details_vbox); */
 
-  gtk_widget_show(fix_frame);
-  gtk_widget_show(fix_view);
-  gtk_widget_show(scrolled_window4);
-  gtk_widget_show(fix_hbuttons);
-  gtk_widget_show(fix_button1);
-  gtk_widget_show(fix_button2);
-  gtk_widget_show(fix_vbox);
+/*   gtk_widget_show(fix_frame); */
+/*   gtk_widget_show(fix_view); */
+/*   gtk_widget_show(scrolled_window4); */
+/*   gtk_widget_show(fix_hbuttons); */
+/*   gtk_widget_show(fix_button1); */
+/*   gtk_widget_show(fix_button2); */
+/*   gtk_widget_show(fix_vbox); */
 
-  gtk_widget_show(hseparator1);
-  gtk_widget_show(h_buttons);
-  gtk_widget_show(send_button);
-  gtk_widget_show(send_label);
-  gtk_widget_show(send_hbox);
-  gtk_widget_show(send_icon);
-  gtk_widget_show(send_align);
-  gtk_widget_show(quit_button);
-  gtk_widget_show(about_button);
-  gtk_widget_show(about_label);
-  gtk_widget_show(about_hbox);
-  gtk_widget_show(about_icon);
-  gtk_widget_show(about_align);
-  gtk_widget_show(help_button);
-  gtk_widget_show(window);
+/*   gtk_widget_show(hseparator1); */
+/*   gtk_widget_show(h_buttons); */
+/*   gtk_widget_show(send_button); */
+/*   gtk_widget_show(send_label); */
+/*   gtk_widget_show(send_hbox); */
+/*   gtk_widget_show(send_icon); */
+/*   gtk_widget_show(send_align); */
+/*   gtk_widget_show(quit_button); */
+/*   gtk_widget_show(about_button); */
+/*   gtk_widget_show(about_label); */
+/*   gtk_widget_show(about_hbox); */
+/*   gtk_widget_show(about_icon); */
+/*   gtk_widget_show(about_align); */
+/*   gtk_widget_show(help_button); */
+  gtk_widget_show_all(window);
 	
   /* Let the show begin */
-  gtk_main ();
+  gtk_main();
 
   return 0;
 
@@ -724,15 +746,15 @@ delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
   GtkWidget *dialog;
   gint result;
 
-  if(dirty>0) {
+  if(dirty > 0) {
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-				     GTK_DIALOG_DESTROY_WITH_PARENT,
-				     GTK_MESSAGE_WARNING,
-				     GTK_BUTTONS_YES_NO,
-				     "Report not sent yet, quit anyway?");
-    result=gtk_dialog_run (GTK_DIALOG (dialog));
-    gtk_widget_destroy (dialog);
+    dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				    GTK_DIALOG_DESTROY_WITH_PARENT,
+				    GTK_MESSAGE_WARNING,
+				    GTK_BUTTONS_YES_NO,
+				    "Report not sent yet, quit anyway?");
+    result = gtk_dialog_run(GTK_DIALOG (dialog));
+    gtk_widget_destroy(dialog);
 
   } else {
 
@@ -740,7 +762,7 @@ delete_event( GtkWidget *widget, GdkEvent *event, gpointer data)
 
   }
 
-  if(result==GTK_RESPONSE_YES) {
+  if(result == GTK_RESPONSE_YES) {
 
     update_profile();
     save_settings(&my_profile);
@@ -768,17 +790,17 @@ quit_pressed( GtkWidget *widget, gpointer data)
   GtkWidget *dialog;
   gint result;
 
-  if(dirty>0) {
+  if(dirty > 0) {
 
     dialog = gtk_message_dialog_new(GTK_WINDOW(window),
 				    GTK_DIALOG_DESTROY_WITH_PARENT,
 				    GTK_MESSAGE_WARNING,
 				    GTK_BUTTONS_YES_NO,
 				    "Report not sent yet, quit anyway?");
-    result=gtk_dialog_run(GTK_DIALOG(dialog));
+    result = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);    
 
-    if(result==GTK_RESPONSE_YES) {
+    if(result == GTK_RESPONSE_YES) {
 
       update_profile();
       save_settings(&my_profile);
@@ -847,7 +869,7 @@ send_pressed( GtkWidget *widget, gpointer data)
   fill_pr(&mypr);
   retcode=send_pr(&mypr);
 
-  if(retcode==0) {
+  if(retcode == 0) {
 
     dirty=0;
     gtk_widget_set_sensitive(send_button, FALSE);
@@ -876,7 +898,7 @@ send_pressed( GtkWidget *widget, gpointer data)
 void 
 open_pressed( GtkWidget *widget, gpointer data)
 {
-  if(open_menu_up==0) {
+  if(open_menu_up == 0) {
 
     fix_filsel=gtk_file_selection_new("Select file to be included the Fix field");
     g_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fix_filsel)->ok_button),
@@ -906,7 +928,7 @@ open_pressed( GtkWidget *widget, gpointer data)
 
     gtk_widget_show(fix_filsel);
 
-    open_menu_up=1;
+    open_menu_up = 1;
   }
 }
 
@@ -936,8 +958,8 @@ select_ok( GtkWidget *widget, gpointer data)
   gtk_widget_hide(fix_filsel);
   gtk_widget_destroy(fix_filsel);
 
-  fix_buffer=load_file(selected_filename);
-  if(fix_buffer!=NULL) {
+  fix_buffer = load_file(selected_filename);
+  if(fix_buffer != NULL) {
 
     gtk_text_buffer_insert_at_cursor(fix_buffer1, fix_buffer, -1);
     free(fix_buffer);
@@ -961,7 +983,7 @@ select_cancelled( GtkWidget *widget, gpointer data)
 {
   gtk_widget_hide(fix_filsel);
   gtk_widget_destroy(fix_filsel);
-  open_menu_up=0;
+  open_menu_up = 0;
 }
 
 
@@ -978,144 +1000,173 @@ void fill_pr(PROBLEM_REPORT *mypr)
   char *temp_cc,*cc_field;
 
   /* Process CC field */
-  mypr->smtp_cc_num=0;
+  mypr->smtp_cc_num = 0;
 
-  mypr->smtp_cc_text=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
+  mypr->smtp_cc_text = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
   cc_field=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry4));
 
   if(strlen(mypr->smtp_cc_text)>0) {
 
     do {
 
-      temp_cc=strsep(&cc_field,",");
+      temp_cc = strsep(&cc_field, ",");
 
-      if(temp_cc!=NULL) {
+      if(temp_cc != NULL) {
 	
-	mypr->smtp_cc[mypr->smtp_cc_num]=temp_cc;
+	mypr->smtp_cc[mypr->smtp_cc_num] = temp_cc;
 	mypr->smtp_cc_num++;
       }
 
-    } while(temp_cc!=NULL);
+    } while(temp_cc != NULL);
 
   }
 
-  mypr->smtp_server=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
-  mypr->smtp_from=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
-  mypr->smtp_to=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry1));
-  mypr->smtp_rcpt=default_rcpt;
-  mypr->smtp_subject=(char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
-  mypr->submitter_id=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry5));
-  mypr->originator=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry6));
-  mypr->organization=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry7));
-  mypr->synopsis=(char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
-  mypr->severity=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo1)->entry));
-  mypr->priority=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo2)->entry));
-  mypr->category=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo3)->entry));
-  mypr->class=(char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(type_combo4)->entry));
-  mypr->release=(char *)gtk_entry_get_text(GTK_ENTRY(system_entry1));
+  mypr->smtp_server = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
+  mypr->smtp_from = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
+  mypr->smtp_to = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry1));
+  mypr->smtp_rcpt = default_rcpt;
+  mypr->smtp_subject = (char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
+  mypr->submitter_id = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry5));
+  mypr->originator = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry6));
+  mypr->organization = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry7));
+  mypr->synopsis = (char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
 
-  buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(system_view1));
-  i=gtk_text_buffer_get_char_count(buffer);
+  mypr->severity = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo1)->child));
+  mypr->priority = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo2)->child));
+  mypr->category = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo3)->child));
+  //gtk_entry_get_text (GTK_ENTRY (GTK_BIN (combo_box)->child))
+  mypr->class = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_BIN(type_combo4)->child));
+
+  mypr->release = (char *)gtk_entry_get_text(GTK_ENTRY(system_entry1));
+
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(system_view1));
+  i = gtk_text_buffer_get_char_count(buffer);
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
-  from=gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
+  from = gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
 
-  env_buffer=malloc(2*i+16);
+  env_buffer = malloc(2*i+16);
   memset(env_buffer,0,2*i+16);
-  ctmp=env_buffer;
+  ctmp = env_buffer;
 
-  for(j=0;j<i;j++) {
+  for(j=0; j<i; j++) {
 
-    c=(char )*from++;
-    if(c!='\n') {
-      *ctmp++=c;
-    } else if(c>126|| (c<31 && c!='\n')) {
+    c = (char )*from++;
+    if(c != '\n') {
+
+      *ctmp++ = c;
+
+    } else if(c > 126 || (c < 31 && c != '\n')) {
+
       break;
+
     } else {
-      *ctmp++='\r';
-      *ctmp++=c;
+
+      *ctmp++ = '\r';
+      *ctmp++ = c;
     }
 
   }
 
-  mypr->environment=env_buffer;
+  mypr->environment = env_buffer;
 
-  buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(details_view1));
-  i=gtk_text_buffer_get_char_count(buffer);
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(details_view1));
+  i = gtk_text_buffer_get_char_count(buffer);
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
-  from=gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
+  from = gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
 
-  desc_buffer=malloc(2*i+16);
+  desc_buffer = malloc(2*i+16);
   memset(desc_buffer,0,2*i+16);
-  ctmp=desc_buffer;
+  ctmp = desc_buffer;
 
-  for(j=0;j<i;j++) {
-    c=(char )*from++;
+  for(j=0; j<i; j++) {
 
-    if(c!='\n') {
-      *ctmp++=c;
-    } else if(c>126||(c<31 && c!='\n')) {
+    c = (char )*from++;
+
+    if(c != '\n') {
+
+      *ctmp++ = c;
+
+    } else if(c > 126 || (c < 31 && c != '\n')) {
+
       break;			
+
     } else {
-      *ctmp++='\r';
-      *ctmp++=c;
+
+      *ctmp++ = '\r';
+      *ctmp++ = c;
     }
 
   }
 
-  mypr->description=desc_buffer;
+  mypr->description = desc_buffer;
 
-  buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(details_view2));
-  i=gtk_text_buffer_get_char_count(buffer);
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(details_view2));
+  i = gtk_text_buffer_get_char_count(buffer);
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
-  from=gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
+  from = gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
         					 
-  how_buffer=malloc(2*i+16); /* Let's be convervative here */
+  how_buffer = malloc(2*i+16); /* Let's be convervative here */
   memset(how_buffer,0,2*i+16);
-  ctmp=how_buffer;
+  ctmp = how_buffer;
 
-  for(j=0;j<i;j++) {
-    c=(char )*from++;
-    if(c!='\n') {
+  for(j=0; j<i; j++) {
 
-      *ctmp++=c;
-    } else if(c>126||(c<31 && c!='\n')) {
+    c = (char )*from++;
+
+    if(c != '\n') {
+
+      *ctmp++ = c;
+
+    } else if(c > 126 || (c < 31 && c != '\n')) {
+
       break;
+
     } else {
-      *ctmp++='\r';
-      *ctmp++=c;
+
+      *ctmp++ = '\r';
+      *ctmp++ = c;
+
     }
 
   }
 
-  mypr->how_to_repeat=how_buffer;
+  mypr->how_to_repeat = how_buffer;
 
-  buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
-  i=gtk_text_buffer_get_char_count(buffer);
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fix_view));
+  i = gtk_text_buffer_get_char_count(buffer);
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
-  from=gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
+  from = gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
         	 
-  fix_buffer=malloc(2*i+16); /* Let's be convervative here */
+  fix_buffer = malloc(2*i+16); /* Let's be convervative here */
   memset(fix_buffer,0,2*i+16);
-  ctmp=fix_buffer;
-  for(j=0;j<i;j++) {
-    c=(char )*from++;
-    if(c!='\n') {
+  ctmp = fix_buffer;
 
-      *ctmp++=c;
-    } else if(c>126 || (c<31 && c!='\n')) {
+  for(j=0; j<i; j++) {
+
+    c = (char )*from++;
+
+    if(c != '\n') {
+
+      *ctmp++ = c;
+
+    } else if(c > 126 || (c < 31 && c != '\n')) {
+
       break;
+
     } else {
-      *ctmp++='\r';
-      *ctmp++=c;
+
+      *ctmp++ = '\r';
+      *ctmp++ = c;
+
     }
 
   }
 
-  mypr->fix=fix_buffer;
+  mypr->fix = fix_buffer;
 
 }
 
@@ -1128,20 +1179,20 @@ update_profile(void)
 
   gtk_window_get_size(GTK_WINDOW(window), &newsize[0], &newsize[1]);
 
-  my_profile.geom_x=newsize[0];
-  my_profile.geom_y=newsize[1];
+  my_profile.geom_x = newsize[0];
+  my_profile.geom_y = newsize[1];
 
   tmp_entry=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry2));
-  strncpy(my_profile.email,tmp_entry,255);
+  strncpy(my_profile.email, tmp_entry, 255);
 
   tmp_entry=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry6));
-  strncpy(my_profile.name,tmp_entry,255);	
+  strncpy(my_profile.name, tmp_entry, 255);	
 
   tmp_entry=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry7));
-  strncpy(my_profile.org,tmp_entry,255);	
+  strncpy(my_profile.org, tmp_entry, 255);	
 
   tmp_entry=(char *)gtk_entry_get_text(GTK_ENTRY(email_entry8));
-  strncpy(my_profile.smtp,tmp_entry,255);
+  strncpy(my_profile.smtp, tmp_entry, 255);
 
 }
 
@@ -1193,14 +1244,13 @@ fix_view_drag_data_received(GtkWidget          *widget,
 
 	for(i=0; i<1024; i++) {
 
-	  if(file_buffer[i] == '\n'|| file_buffer[i] == '\r') file_buffer[i]='\0';
+	  if(file_buffer[i] == '\n'|| file_buffer[i] == '\r') file_buffer[i] = '\0';
 
 	}
 
-	printf("Valer: {%s}\n", file_buffer);
-	fix_buffer=load_file(file_buffer);
+	fix_buffer = load_file(file_buffer);
 
-	if(fix_buffer!=NULL) {
+	if(fix_buffer != NULL) {
 
 	  gtk_text_buffer_insert_at_cursor(fix_buffer1, fix_buffer, -1);
 	  free(fix_buffer);
@@ -1208,14 +1258,14 @@ fix_view_drag_data_received(GtkWidget          *widget,
 	} else {
 
 	  snprintf(file_warning,1024,"Unable to read: %s",file_buffer);
-	  file_dialog = gtk_message_dialog_new (GTK_WINDOW(window),
-						GTK_DIALOG_DESTROY_WITH_PARENT,
-						GTK_MESSAGE_ERROR,
-						GTK_BUTTONS_OK,
-						file_warning);
+	  file_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+					       GTK_DIALOG_DESTROY_WITH_PARENT,
+					       GTK_MESSAGE_ERROR,
+					       GTK_BUTTONS_OK,
+					       file_warning);
 
-	  gtk_dialog_run (GTK_DIALOG (file_dialog));
-	  gtk_widget_destroy (file_dialog);
+	  gtk_dialog_run(GTK_DIALOG (file_dialog));
+	  gtk_widget_destroy(file_dialog);
 
 	}
 
@@ -1235,8 +1285,8 @@ int
 gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 {
 
-  auth_info=my_auth;
-  gsp_auth_done=FALSE;
+  auth_info = my_auth;
+  gsp_auth_done = FALSE;
 
   auth_window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_modal(GTK_WINDOW(auth_window), TRUE);
@@ -1255,12 +1305,12 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 
   auth_label=gtk_label_new("\nSMTP server requires authentication\n");
 
-  auth_userframe=gtk_frame_new("User name");
-  auth_userentry=gtk_entry_new();
+  auth_userframe = gtk_frame_new("User name");
+  auth_userentry = gtk_entry_new();
   gtk_container_add(GTK_CONTAINER(auth_userframe), auth_userentry);
 
-  auth_passframe=gtk_frame_new("Password");
-  auth_passentry=gtk_entry_new();
+  auth_passframe = gtk_frame_new("Password");
+  auth_passentry = gtk_entry_new();
   gtk_entry_set_visibility(GTK_ENTRY(auth_passentry), FALSE);
   gtk_container_add(GTK_CONTAINER(auth_passframe), auth_passentry);
 
@@ -1286,7 +1336,7 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
   gtk_widget_show(auth_passentry);
   gtk_widget_show(auth_ok);
 
-  while(gsp_auth_done!=TRUE) {
+  while(gsp_auth_done != TRUE) {
 
     gtk_main_iteration();
 
@@ -1301,8 +1351,8 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
 {
 
   /* Keep a copy before destroying the widgets */
-  strncpy(auth_info->username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)),1023);
-  strncpy(auth_info->password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)),1023);
+  strncpy(auth_info->username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)), 1023);
+  strncpy(auth_info->password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)), 1023);
   
   gtk_widget_hide(auth_window);
   gtk_widget_hide(auth_vbox);
@@ -1322,6 +1372,6 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   gtk_widget_destroy(auth_vbox);
   gtk_widget_destroy(auth_window);
 
-  gsp_auth_done=TRUE;
+  gsp_auth_done = TRUE;
   
 }
