@@ -55,87 +55,100 @@ save_settings(USER_PROFILE *my_profile)
   char temp_org[1024];
   char temp_smtp[1024];
   char temp_geometry[1024];
-	
+  char temp_smtp_port[1024];
+
   int i,j;
   FILE *f;
 	
   struct stat sb;
 	
-  homedir=getenv("HOME");
-  if(homedir==NULL) return;
-  snprintf(temp,1024,"%s/%s",homedir,".gtk-send-pr");
+  homedir = getenv("HOME");
+  if(homedir == NULL) return;
+  snprintf(temp, 1024, "%s/%s", homedir, ".gtk-send-pr");
 	
-  i=stat(temp, &sb);
-  if(i==-1) {
+  i = stat(temp, &sb);
+  if(i == -1) {
 	
     j=mkdir(temp,0700);
 	
-  } else if((sb.st_mode & S_IFDIR)!=S_IFDIR){
+  } else if((sb.st_mode & S_IFDIR) != S_IFDIR){
 	
-    j=unlink(temp);
-    if(j!=-1) {
+    j = unlink(temp);
+
+    if(j != -1) {
 		
-      j=mkdir(temp,0700);
+      j = mkdir(temp,0700);
 		
     }
 	
-    if(j==-1) return;
+    if(j == -1) return;
 	
   }
 	
-  snprintf(temp_name,1024,"%s/name",temp);
-  snprintf(temp_email,1024,"%s/email",temp);
-  snprintf(temp_org,1024,"%s/organization",temp);
-  snprintf(temp_smtp,1024,"%s/smtp",temp);
-  snprintf(temp_geometry,1024,"%s/geometry",temp);
-	
-  if(strncmp(my_profile->name,old_profile.name,
+  snprintf(temp_name, 1024, "%s/name", temp);
+  snprintf(temp_email, 1024, "%s/email", temp);
+  snprintf(temp_org,1024, "%s/organization", temp);
+  snprintf(temp_smtp,1024, "%s/smtp", temp);
+  snprintf(temp_geometry, 1024, "%s/geometry", temp);
+  snprintf(temp_smtp_port, 1024, "%s/smtp_port", temp);
+
+  if(strncmp(my_profile->name, old_profile.name,
 	     (sizeof(((USER_PROFILE *) 0)->name)))!=0 || migration==1) {
 
-    f=fopen(temp_name,"w");
-    if(f==NULL) return;
-    fprintf(f,my_profile->name);
+    f=fopen(temp_name, "w");
+    if(f == NULL) return;
+    fprintf(f, my_profile->name);
     fclose(f);
 
   }
 
-  if(strncmp(my_profile->email,old_profile.email,
+  if(strncmp(my_profile->email, old_profile.email,
 	     (sizeof(((USER_PROFILE *) 0)->email)))!=0 || migration==1) {
 
-    f=fopen(temp_email,"w");
+    f=fopen(temp_email, "w");
     if(f==NULL) return;
-    fprintf(f,my_profile->email);
+    fprintf(f, my_profile->email);
     fclose(f);
 
   }
 
-  if(strncmp(my_profile->org,old_profile.org,
+  if(strncmp(my_profile->org, old_profile.org,
 	     (sizeof(((USER_PROFILE *) 0)->org)))!=0 || migration==1) {
 
-    f=fopen(temp_org,"w");
+    f=fopen(temp_org, "w");
     if(f==NULL) return;
-    fprintf(f,my_profile->org);
+    fprintf(f, my_profile->org);
     fclose(f);
 
   }
 	
-  if(strncmp(my_profile->smtp,old_profile.smtp,
-	     (sizeof(((USER_PROFILE *) 0)->smtp)))!=0 || migration==1) {
+  if(strncmp(my_profile->smtp, old_profile.smtp,
+	     (sizeof(((USER_PROFILE *) 0)->smtp)))!=0 || migration == 1) {
 
-    f=fopen(temp_smtp,"w");
-    if(f==NULL) return;
-    fprintf(f,my_profile->smtp);
+    f = fopen(temp_smtp, "w");
+    if(f == NULL) return;
+    fprintf(f, my_profile->smtp);
     fclose(f);
 
   }
 
-  if( ((my_profile->geom_x!=old_profile.geom_x) || 
-       (my_profile->geom_y!=old_profile.geom_y) ) ||
-      migration==1) {
+  if(strncmp(my_profile->smtp_port, old_profile.smtp_port,
+	     (sizeof(((USER_PROFILE *) 0)->smtp_port)))!=0 || migration == 1) {
 
-    f=fopen(temp_geometry,"w");
-    if(f==NULL) return;
-    fprintf(f,"%i,%i",my_profile->geom_x,my_profile->geom_y);
+    f = fopen(temp_smtp_port, "w");
+    if(f == NULL) return;
+    fprintf(f, my_profile->smtp_port);
+    fclose(f);
+
+  }
+
+  if( ((my_profile->geom_x != old_profile.geom_x) || 
+       (my_profile->geom_y != old_profile.geom_y) ) ||
+      migration == 1) {
+
+    f = fopen(temp_geometry, "w");
+    if(f == NULL) return;
+    fprintf(f, "%i,%i", my_profile->geom_x, my_profile->geom_y);
     fclose(f);
 
   }
@@ -155,108 +168,124 @@ load_settings(USER_PROFILE *my_profile)
   char temp_email[1024];
   char temp_org[1024];
   char temp_smtp[1024];
+  char temp_smtp_port[1024];
   char temp_geometry[1024];
   int fd;
   FILE *f;
   struct stat sb;
 
 
-  migration=0;
-  homedir=getenv("HOME");
-  assert(homedir!=NULL);
+  migration = 0;
+  homedir = getenv("HOME");
+  assert(homedir != NULL);
 	
-  snprintf(temp,1024,"%s/%s",homedir,".gtk-send-pr");
+  snprintf(temp,1024, "%s/%s", homedir, ".gtk-send-pr");
   i=stat(temp, &sb);
-  if(i==-1) {	
+  if(i == -1) {	
 		
-    snprintf(temp,1024,"%s/%s",homedir,".gtk-send-pr-rc");
-    fd=open(temp,O_RDONLY,0);
-    if(fd!=-1) {
-      read(fd,my_profile,sizeof(USER_PROFILE));
+    snprintf(temp, 1024, "%s/%s", homedir, ".gtk-send-pr-rc");
+    fd = open(temp, O_RDONLY, 0);
+    if(fd != -1) {
+      read(fd, my_profile, sizeof(USER_PROFILE));
       close(fd);
       unlink(temp);
-      migration=1;
+      migration = 1;
 
     } else  {
 		
-      /* Let's see who am I */
-      pr_user=getpwuid(getuid());
+      /* Let's see who I am */
+      pr_user = getpwuid(getuid());
 
-      my_profile->geom_x=400;
-      my_profile->geom_y=480;
-      strncpy(my_profile->name,pr_user->pw_gecos,255);
-      strncpy(my_profile->email,pr_user->pw_name,255);
-      sprintf(my_profile->org," ");
-      sprintf(my_profile->smtp,"FILL THIS!!!");
+      my_profile->geom_x = 400;
+      my_profile->geom_y = 480;
+      strncpy(my_profile->name, pr_user->pw_gecos, 255);
+      strncpy(my_profile->email, pr_user->pw_name, 255);
+      sprintf(my_profile->org, " ");
+      sprintf(my_profile->smtp, "FILL THIS!!!");
     }
 		
   } else {
 	
 		
-    snprintf(temp_name,1024,"%s/name",temp);
-    snprintf(temp_email,1024,"%s/email",temp);
-    snprintf(temp_org,1024,"%s/organization",temp);
-    snprintf(temp_smtp,1024,"%s/smtp",temp);
-    snprintf(temp_geometry,1024,"%s/geometry",temp);
+    snprintf(temp_name,1024, "%s/name", temp);
+    snprintf(temp_email,1024,"%s/email", temp);
+    snprintf(temp_org,1024, "%s/organization", temp);
+    snprintf(temp_smtp,1024, "%s/smtp", temp);
+    snprintf(temp_smtp_port, 1024, "%s/smtp_port", temp);
+    snprintf(temp_geometry,1024, "%s/geometry", temp);
 	
-    fd=open(temp_name,O_RDONLY,0);
-    if(fd!=-1) {
+    fd = open(temp_name, O_RDONLY, 0);
+    if(fd != -1) {
 
-      read(fd,my_profile->name,sizeof(my_profile->name));
+      read(fd, my_profile->name, sizeof(my_profile->name));
       close(fd);
 
     } else {
 
-      pr_user=getpwuid(getuid());
-      strncpy(my_profile->name,pr_user->pw_gecos,255);
-      migration=1;
+      pr_user = getpwuid(getuid());
+      strncpy(my_profile->name, pr_user->pw_gecos, 255);
+      migration = 1;
 
     }
 
-    fd=open(temp_email,O_RDONLY,0);
-    if(fd!=-1) {
+    fd = open(temp_email, O_RDONLY, 0);
+    if(fd != -1) {
 
-      read(fd,my_profile->email,sizeof(my_profile->email));
+      read(fd, my_profile->email, sizeof(my_profile->email));
       close(fd);
 
     }
 	
-    fd=open(temp_org,O_RDONLY,0);
-    if(fd!=-1) {
+    fd = open(temp_org, O_RDONLY,0);
+    if(fd != -1) {
 
-      read(fd,my_profile->org,sizeof(my_profile->org));
+      read(fd,my_profile->org, sizeof(my_profile->org));
       close(fd);
 
     }
 	
-    fd=open(temp_smtp,O_RDONLY,0);
-    if(fd!=-1) {
+    fd = open(temp_smtp,O_RDONLY,0);
+    if(fd != -1) {
 
-      read(fd,my_profile->smtp,sizeof(my_profile->smtp));
+      read(fd, my_profile->smtp, sizeof(my_profile->smtp));
       close(fd);
 	
     } else {
 
-      sprintf(my_profile->smtp,"FILL THIS!!!");
-      migration=1;
+      sprintf(my_profile->smtp, "FILL THIS!!!");
+      migration = 1;
+
+    }
+
+    fd = open(temp_smtp_port,O_RDONLY,0);
+    if(fd != -1) {
+
+      read(fd, my_profile->smtp_port, sizeof(my_profile->smtp_port));
+      close(fd);
+	
+    } else {
+
+      sprintf(my_profile->smtp_port, "25");
+      migration = 1;
+
     }
 
     f=fopen(temp_geometry,"r");
-    if(f!=NULL) {
+    if(f != NULL) {
 
-      fscanf(f,"%i,%i",&my_profile->geom_x,&my_profile->geom_y);
+      fscanf(f, "%i,%i", &my_profile->geom_x, &my_profile->geom_y);
       fclose(f);	
 
     } else {
 
-      my_profile->geom_x=400;
-      my_profile->geom_y=480;
-      migration=1;
+      my_profile->geom_x = 400;
+      my_profile->geom_y = 480;
+      migration = 1;
     }
 
   }
   /* Keep a copy of the user profile */
-  memcpy(&old_profile,my_profile,sizeof(USER_PROFILE));
+  memcpy(&old_profile, my_profile, sizeof(USER_PROFILE));
   return;
 	
 }

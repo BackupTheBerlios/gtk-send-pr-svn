@@ -42,7 +42,8 @@
 
 #include "uname_gather.h"
 
-/* Stores uname info in two char arrays.
+/*
+ * Stores uname info in two char arrays.
  * The first one corresponds to the uname -srm
  * The second one has the output from uname -a,
  * gathered from the sysctl info. Using the uname
@@ -62,26 +63,26 @@ uname_gather(char *uname_srm,char *uname_snrvm)
 
   struct utsname my_uname;
 
-  i=uname(&my_uname);
-  if(i==-1) {
+  i = uname(&my_uname);
+  if(i ==- 1) {
     perror("uname()");
     exit(EXIT_FAILURE);
   }
 
-  snprintf(uname_srm,255,"%s %s %s",my_uname.sysname,
+  snprintf(uname_srm, 255, "%s %s %s", my_uname.sysname,
 	   my_uname.release,
 	   my_uname.machine);
 
 
   /* 
    * Use this method for people using pkgsrc in e.g.
-   * GNU/Linux/GNU, which uses its own proprietary and
+   * GNU/Linux, which uses its own proprietary and
    * incompatible sysctl interface.
    */
 
 #if defined (USE_OLD_UNAME_METHOD)
 
-  snprintf(uname_snrvm,1023,"System: %s %s %s %s %s",
+  snprintf(uname_snrvm, 1023, "System: %s %s %s %s %s",
 	   my_uname.sysname,
 	   my_uname.nodename,
 	   my_uname.release,

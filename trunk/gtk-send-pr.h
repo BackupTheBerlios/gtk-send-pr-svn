@@ -30,10 +30,11 @@
 
 typedef struct user_prfile {
 
-  char name[255];
-  char email[255];
-  char org[255];
-  char smtp[255];
+  char name[256];
+  char email[256];
+  char org[256];
+  char smtp[256];
+  char smtp_port[16];
   int geom_x;
   int geom_y;
 	
@@ -42,6 +43,7 @@ typedef struct user_prfile {
 typedef struct problem_report {
 
   char *smtp_server;
+  char *smtp_port;
   char *smtp_from;
   char *smtp_to;
   char *smtp_rcpt;

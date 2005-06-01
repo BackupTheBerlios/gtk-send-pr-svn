@@ -54,7 +54,7 @@ void build_message(FILE *, PROBLEM_REPORT *);
 int authinteract(auth_client_request_t request, char **result, int fields, void *arg);
 
 char global_smtp_error_msg[1024];
-GSP_AUTH *my_auth=NULL;
+GSP_AUTH *my_auth = NULL;
 
 extern int gsp_auth_done;
 	
@@ -80,7 +80,7 @@ send_pr(PROBLEM_REPORT *mypr)
   char my_recipient[1024];
   char buf[128];
 
-  if(gsp_auth_done!=TRUE) {
+  if(gsp_auth_done != TRUE) {
 
     my_auth = malloc(sizeof(GSP_AUTH));
     my_auth->username = malloc(1024);
@@ -113,7 +113,7 @@ send_pr(PROBLEM_REPORT *mypr)
   session = smtp_create_session();
   message = smtp_add_message(session);
 
-  snprintf(my_smtp_server, 1024, "%s:25", mypr->smtp_server);
+  snprintf(my_smtp_server, 1024, "%s:%s", mypr->smtp_server, mypr->smtp_port);
 
   host = my_smtp_server;
 
