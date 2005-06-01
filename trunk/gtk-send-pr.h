@@ -25,8 +25,12 @@
 
 */
 
-#define GSP_VERSION "0.4.4"
+#define GSP_VERSION "0.4.5"
 #define GSP_CODENAME "\"Do It For The Kids\""
+
+#define GSP_SSL_NO 0
+#define GSP_SSL_EN 1
+#define GSP_SSL_RE 2
 
 typedef struct user_prfile {
 
@@ -37,6 +41,7 @@ typedef struct user_prfile {
   char smtp_port[16];
   int geom_x;
   int geom_y;
+  int  ssl_mode;
 	
 } USER_PROFILE;
 
@@ -65,7 +70,8 @@ typedef struct problem_report {
   char *description;
   char *how_to_repeat;
   char *fix;
-	
+  int  ssl_mode;
+
 } PROBLEM_REPORT;
 
 

@@ -50,10 +50,10 @@ extern char *tzname[2];
 #include "file.h"
 #include "uname_gather.h"
 
-#include "ladybug16.xpm"
-#include "ladybug32.xpm"
-#include "ladybug48.xpm"
-#include "ladybug64.xpm"
+#include "ladybird16.xpm"
+#include "ladybird32.xpm"
+#include "ladybird48.xpm"
+#include "ladybird64.xpm"
 
 extern char global_smtp_error_msg[1024];
 
@@ -86,6 +86,12 @@ static GtkWidget *email_entry6;
 static GtkWidget *email_entry7;
 static GtkWidget *email_entry8;
 static GtkWidget *email_port_entry;
+static GtkWidget *email_ssl_option;
+
+#define SSL_NO "Don't use SSL"
+#define SSL_EN "Use SSL if possible"
+#define SSL_RE "Always Use SSL"
+
 static GtkWidget *type_combo1;
 static GtkWidget *type_combo2;
 static GtkWidget *type_combo3;
@@ -250,10 +256,10 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_window_set_default_size(GTK_WINDOW(window), my_profile.geom_x, my_profile.geom_y);
 
   /* Set the icon */
-  icon16_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug16);
-  icon32_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug32);
-  icon48_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug48);
-  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybug64);
+  icon16_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird16);
+  icon32_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird32);
+  icon48_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird48);
+  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird64);
 
   g_list_append(icon_list, icon16_pixbuf);
   g_list_append(icon_list, icon32_pixbuf);
@@ -279,7 +285,14 @@ create_gtk_ui(char *included_file, int maint_mode)
   quit_button = gtk_button_new_from_stock(GTK_STOCK_QUIT);
 
   about_button = gtk_button_new();
+
+#if(GTK_MINOR_VERSION>=6)
+  about_icon = gtk_image_new_from_stock(GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
+#else
   about_icon = gtk_image_new_from_stock(GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
+#endif
+
+
   about_label = gtk_label_new_with_mnemonic("_About");
   about_hbox = gtk_hbox_new(FALSE, 2);
   about_align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
@@ -388,9 +401,16 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_entry_set_max_length(GTK_ENTRY(email_port_entry), 16);
   gtk_entry_set_text(GTK_ENTRY(email_port_entry), my_profile.smtp_port);
 
+  email_ssl_option = gtk_combo_box_new_text();
+  gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_NO);
+  gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_EN);
+  gtk_combo_box_append_text(GTK_COMBO_BOX(email_ssl_option), (const gchar *) SSL_RE);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(email_ssl_option), 0);
+  
   email_hbox1 = gtk_hbox_new(FALSE, 4);
   gtk_box_pack_start(GTK_BOX(email_hbox1), email_entry8, TRUE, TRUE, 4);
   gtk_box_pack_start(GTK_BOX(email_hbox1), email_port_entry, FALSE, FALSE, 4);
+  gtk_box_pack_start(GTK_BOX(email_hbox1), email_ssl_option, FALSE, FALSE, 4);
   
   gtk_container_add(GTK_CONTAINER(email_frame1), email_entry1);
   gtk_container_add(GTK_CONTAINER(email_frame2), email_entry2);
@@ -409,7 +429,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   gtk_box_pack_start(GTK_BOX(email_vbox), email_frame5, TRUE, TRUE, 4);
   gtk_box_pack_start(GTK_BOX(email_vbox), email_frame6, TRUE, TRUE, 4);
   gtk_box_pack_start(GTK_BOX(email_vbox), email_frame7, TRUE, TRUE, 4);			
-  gtk_box_pack_start(GTK_BOX(email_vbox), email_frame8, TRUE, TRUE, 4);	
+  gtk_box_pack_start(GTK_BOX(email_vbox), email_frame8, FALSE, FALSE, 4);	
 
   /* PR type code */
   type_vbox = gtk_vbox_new(FALSE, 2);
@@ -803,9 +823,17 @@ about_pressed( GtkWidget *widget, gpointer data)
     NULL
   };
 
+  const gchar *artists[] = {
+    "Alan Smith <alan@toonart.co.uk>",
+    NULL
+  };
+
+  const gchar *comments = 
+    "A user friendly GNATS client";
+
   const gchar *license =
     "Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.\n"
-    ""
+    "\n"
     "Redistribution and use in source and binary forms, with or without\n"
     "modification, are permitted provided that the following conditions are met:\n"
     "\n"
@@ -828,7 +856,9 @@ about_pressed( GtkWidget *widget, gpointer data)
 
   gtk_show_about_dialog(GTK_WINDOW(window),
 			"authors", authors,
+			"artists", artists,
 			"copyright", "(C) 2003-2005 Miguel Mendez",
+			"comments", comments,
 			"license", license,
 			"logo", icon64_pixbuf,
 			"name", "gtk-send-pr",
@@ -982,6 +1012,7 @@ fill_pr(PROBLEM_REPORT *mypr)
   GtkTextIter beg_iter;
   GtkTextIter end_iter;
   char *temp_cc,*cc_field;
+  char *temp_ssl;
 
   /* Process CC field */
   mypr->smtp_cc_num = 0;
@@ -1011,6 +1042,29 @@ fill_pr(PROBLEM_REPORT *mypr)
   mypr->smtp_to = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry1));
 
   mypr->smtp_rcpt = default_rcpt;
+
+  temp_ssl = gtk_combo_box_get_active_text(GTK_COMBO_BOX(email_ssl_option));
+
+  if (strcmp(temp_ssl, SSL_NO) == 0) {
+
+    mypr->ssl_mode = GSP_SSL_NO;
+
+  } else if (strcmp(temp_ssl, SSL_EN) == 0) {
+
+    mypr->ssl_mode = GSP_SSL_EN;
+
+  } else if (strcmp(temp_ssl, SSL_RE) == 0) {
+
+    mypr->ssl_mode = GSP_SSL_RE;
+
+  } else {
+
+    fprintf(stderr, "Warning, SSL mode was in undefined state.\n");
+    mypr->ssl_mode = GSP_SSL_NO;
+
+  }
+
+  g_free(temp_ssl);
 
   mypr->smtp_subject = (char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
   mypr->submitter_id = (char *)gtk_entry_get_text(GTK_ENTRY(email_entry5));
@@ -1277,7 +1331,7 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
   auth_info = my_auth;
   gsp_auth_done = FALSE;
 
-  auth_window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  auth_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_modal(GTK_WINDOW(auth_window), TRUE);
   gtk_window_set_title(GTK_WINDOW(auth_window), "SMTP Auth");
   gtk_window_set_resizable(GTK_WINDOW(auth_window), TRUE);
@@ -1316,14 +1370,14 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
   gtk_box_set_homogeneous(GTK_BOX(auth_vbox), FALSE);
   gtk_container_add(GTK_CONTAINER(auth_window), auth_vbox);
 
-  gtk_widget_show(auth_window);
-  gtk_widget_show(auth_vbox);
-  gtk_widget_show(auth_label);
-  gtk_widget_show(auth_userframe);
-  gtk_widget_show(auth_userentry);
-  gtk_widget_show(auth_passframe);
-  gtk_widget_show(auth_passentry);
-  gtk_widget_show(auth_ok);
+  gtk_widget_show_all(auth_window);
+/*   gtk_widget_show(auth_vbox); */
+/*   gtk_widget_show(auth_label); */
+/*   gtk_widget_show(auth_userframe); */
+/*   gtk_widget_show(auth_userentry); */
+/*   gtk_widget_show(auth_passframe); */
+/*   gtk_widget_show(auth_passentry); */
+/*   gtk_widget_show(auth_ok); */
 
   while(gsp_auth_done != TRUE) {
 
@@ -1343,22 +1397,22 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   strncpy(auth_info->username,(char *)gtk_entry_get_text(GTK_ENTRY(auth_userentry)), 1023);
   strncpy(auth_info->password,(char *)gtk_entry_get_text(GTK_ENTRY(auth_passentry)), 1023);
   
-  gtk_widget_hide(auth_window);
-  gtk_widget_hide(auth_vbox);
-  gtk_widget_hide(auth_label);
-  gtk_widget_hide(auth_userframe);
-  gtk_widget_hide(auth_userentry);
-  gtk_widget_hide(auth_passframe);
-  gtk_widget_hide(auth_passentry);
-  gtk_widget_hide(auth_ok);
+/*   gtk_widget_hide(auth_window); */
+/*   gtk_widget_hide(auth_vbox); */
+/*   gtk_widget_hide(auth_label); */
+/*   gtk_widget_hide(auth_userframe); */
+/*   gtk_widget_hide(auth_userentry); */
+/*   gtk_widget_hide(auth_passframe); */
+/*   gtk_widget_hide(auth_passentry); */
+/*   gtk_widget_hide(auth_ok); */
 
-  gtk_widget_destroy(auth_label);
-  gtk_widget_destroy(auth_userentry);
-  gtk_widget_destroy(auth_userframe);
-  gtk_widget_destroy(auth_passentry);
-  gtk_widget_destroy(auth_passframe);
-  gtk_widget_destroy(auth_ok);
-  gtk_widget_destroy(auth_vbox);
+/*   gtk_widget_destroy(auth_label); */
+/*   gtk_widget_destroy(auth_userentry); */
+/*   gtk_widget_destroy(auth_userframe); */
+/*   gtk_widget_destroy(auth_passentry); */
+/*   gtk_widget_destroy(auth_passframe); */
+/*   gtk_widget_destroy(auth_ok); */
+/*   gtk_widget_destroy(auth_vbox); */
   gtk_widget_destroy(auth_window);
 
   gsp_auth_done = TRUE;
@@ -1406,4 +1460,3 @@ show_categories(void)
   exit(EXIT_SUCCESS);
 
 }
-

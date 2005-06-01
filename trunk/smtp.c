@@ -38,6 +38,7 @@
 #include <time.h>
 extern char *tzname[2];
 
+#include <openssl/ssl.h>
 #include <auth-client.h>
 #include <libesmtp.h>
 
@@ -49,10 +50,13 @@ extern char *tzname[2];
 #define TRUE 1
 #endif
 
+#define SMTP_DEBUG(x) printf("Debug %i\n",x);
 
 static void build_message(FILE *, PROBLEM_REPORT *);
 static int authinteract(auth_client_request_t request, 
 			char **result, int fields, void *arg);
+
+static int tlsinteract(char *, int , int , void *);
 
 char global_smtp_error_msg[1024];
 static GSP_AUTH *my_auth = NULL;
@@ -77,7 +81,7 @@ send_pr(PROBLEM_REPORT *mypr)
   auth_context_t authctx;
   int noauth = 0;
   char *host = NULL;
-  int i;
+  int i = 0;
 
   enum notify_flags notify = Notify_SUCCESS|Notify_FAILURE;
   FILE *fp;
@@ -89,7 +93,7 @@ send_pr(PROBLEM_REPORT *mypr)
   char my_recipient[1024];
   char buf[128];
 
-  if(gsp_auth_done != TRUE) {
+  if (gsp_auth_done != TRUE) {
 
     my_auth = malloc(sizeof(GSP_AUTH));
     my_auth->username = malloc(1024);
@@ -103,7 +107,7 @@ send_pr(PROBLEM_REPORT *mypr)
 
   memset(tempfile, 0, sizeof(tempfile));
 
-  if(tmpdir != NULL) {
+  if (tmpdir != NULL) {
 
     snprintf(tempfile, FILENAME_MAX, "%s/gtk-send-pr.XXXXXXXX", tmpdir);
 
@@ -124,19 +128,42 @@ send_pr(PROBLEM_REPORT *mypr)
   session = smtp_create_session();
   message = smtp_add_message(session);
 
+  printf("Before starttls...\n");
+
+  switch (mypr->ssl_mode) {
+
+  case GSP_SSL_NO :
+
+    i = smtp_starttls_enable(session, Starttls_DISABLED);
+    break;
+
+  case GSP_SSL_EN :
+
+    i = smtp_starttls_enable(session, Starttls_ENABLED);
+    break;
+
+  case GSP_SSL_RE :
+
+    i = smtp_starttls_enable(session, Starttls_REQUIRED);
+    break;
+
+  }
+
+  printf("After starttls...\n");
+
+  //  smtp_starttls_set_password_cb(tlsinteract, NULL);
+
   snprintf(my_smtp_server, 1024, "%s:%s", mypr->smtp_server, mypr->smtp_port);
 
   host = my_smtp_server;
 
   smtp_set_server(session, host);
 
-  i = smtp_starttls_enable(session, Starttls_DISABLED);
-
   authctx = auth_create_context();
   auth_set_mechanism_flags(authctx, AUTH_PLUGIN_PLAIN, 0);
   auth_set_interact_cb(authctx, authinteract, NULL);
 
-  if(!noauth) {
+  if (!noauth) {
 
     smtp_auth_set_context(session, authctx);
 
@@ -157,9 +184,9 @@ send_pr(PROBLEM_REPORT *mypr)
   recipient = smtp_add_recipient(message, my_recipient);
   smtp_dsn_set_notify(recipient, notify);
 
-  if((mypr->smtp_cc_num) > 0) {
+  if (mypr->smtp_cc_num > 0) {
 
-    for(i=0; i<(mypr->smtp_cc_num); i++) {
+    for (i = 0; i < mypr->smtp_cc_num; i++) {
 
       smtp_set_header(message, "CC", NULL, mypr->smtp_cc[i]);
       snprintf(my_recipient, 1024, "%s", mypr->smtp_cc[i]);
@@ -167,6 +194,7 @@ send_pr(PROBLEM_REPORT *mypr)
       smtp_dsn_set_notify(recipient, notify);			
 
     }
+
   }
 
   if (!smtp_start_session(session)) {
@@ -187,10 +215,10 @@ send_pr(PROBLEM_REPORT *mypr)
 
     status = smtp_message_transfer_status(message);
 
-    if(status != NULL) {
+    if (status != NULL) {
 
       /* Something went wrong... */
-      if(status->code >= 400) {
+      if (status->code >= 400) {
 
 	snprintf(global_smtp_error_msg, 1024, "SMTP server problem : %i %s\n",
 		 status->code, status->text);
@@ -271,23 +299,23 @@ authinteract(auth_client_request_t request,
 {
   int i;
 
-  if(gsp_auth_done != TRUE) {
+  if (gsp_auth_done != TRUE) {
 
     gsp_smtp_auth_dialog(my_auth);
 
   }
 
-  for(i=0; i<fields; i++) {
+  for (i = 0; i < fields; i++) {
 
-    if(request[i].flags & AUTH_PASS) {
+    if (request[i].flags & AUTH_PASS) {
 
       result[i] = my_auth->password;
 
-    } else if(request[i].flags & AUTH_USER) {
+    } else if (request[i].flags & AUTH_USER) {
 
       result[i] = my_auth->username;
 
-    } else if(result[i] == NULL) {
+    } else if (result[i] == NULL) {
 
       return 0;
 
@@ -297,4 +325,18 @@ authinteract(auth_client_request_t request,
 
   return 1;
 
+}
+
+static int
+tlsinteract(char *buf, int buflen, int rwflag , void *arg )
+{
+  char *pw;
+  int len;
+
+  pw = getpass ("certificate password");
+  len = strlen (pw);
+  if (len + 1 > buflen)
+    return 0;
+  strcpy (buf, pw);
+  return len;
 }
