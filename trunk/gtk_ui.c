@@ -118,6 +118,8 @@ static GtkWidget *auth_userentry;
 static GtkWidget *auth_passentry;
 static int open_menu_up;
 
+static GdkPixbuf *icon64_pixbuf;
+
 int gsp_auth_done;
 static GSP_AUTH *auth_info;
 
@@ -204,7 +206,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   GdkPixbuf *icon16_pixbuf;
   GdkPixbuf *icon32_pixbuf;
   GdkPixbuf *icon48_pixbuf;
-  GdkPixbuf *icon64_pixbuf;
+  //  GdkPixbuf *icon64_pixbuf;
   GList *icon_list = NULL;
 
   char uname_srm[256];
@@ -244,7 +246,7 @@ create_gtk_ui(char *included_file, int maint_mode)
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
-  gtk_window_set_title(GTK_WINDOW(window), "GTK+ Send-PR " GSP_VERSION);
+  gtk_window_set_title(GTK_WINDOW(window), "gtk-send-pr " GSP_VERSION);
   gtk_window_set_default_size(GTK_WINDOW(window), my_profile.geom_x, my_profile.geom_y);
 
   /* Set the icon */
@@ -795,20 +797,43 @@ static void
 about_pressed( GtkWidget *widget, gpointer data)
 {
 
-  GtkWidget *dialog;
+  const gchar *authors[] = {
+    "Miguel Mendez <flynn@energyhq.es.eu.org>",
+    NULL
+  };
 
-  dialog = gtk_message_dialog_new(GTK_WINDOW(window),
-				  GTK_DIALOG_DESTROY_WITH_PARENT,
-				  GTK_MESSAGE_INFO,
-				  GTK_BUTTONS_OK,
-				  "gtk-send-pr "
-				  GSP_VERSION " "
-				  GSP_CODENAME
-				  "\nCopyright (c) 2003-2005, "
-				  "Miguel Mendez\nE-Mail: <flynn@energyhq.es.eu.org>\n"
-				  "http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
-  gtk_dialog_run(GTK_DIALOG(dialog));
-  gtk_widget_destroy(dialog);
+  const gchar *license =
+    "Copyright (c) 2003-2005, Miguel Mendez. All rights reserved.\n"
+    ""
+    "Redistribution and use in source and binary forms, with or without\n"
+    "modification, are permitted provided that the following conditions are met:\n"
+    "\n"
+    "* Redistributions of source code must retain the above copyright notice,\n"
+    "this list of conditions and the following disclaimer.\n"
+    "* Redistributions in binary form must reproduce the above copyright notice,\n"
+    "this list of conditions and the following disclaimer in the documentation\n"
+    "and/or other materials provided with the distribution.\n"
+    "\n"
+    "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n"
+    "AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n"
+    "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n"
+    "DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE\n"
+    "FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n"
+    "DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n"
+    "SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n"
+    "CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\n"
+    "OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+    "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n";
+
+  gtk_show_about_dialog(GTK_WINDOW(window),
+			"authors", authors,
+			"copyright", "(C) 2003-2005 Miguel Mendez",
+			"license", license,
+			"logo", icon64_pixbuf,
+			"name", "gtk-send-pr",
+			"version", GSP_VERSION,
+			"website", "http://www.energyhq.es.eu.org/gtk-send-pr.html",
+			NULL);
 
 }
 
