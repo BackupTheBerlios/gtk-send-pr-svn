@@ -135,8 +135,6 @@ send_pr(PROBLEM_REPORT *mypr,struct utsname *my_uname)
   recipient = smtp_add_recipient(message, my_recipient);
   smtp_dsn_set_notify(recipient, notify);
 
-  printf("Numero de CCdos: %i\n",mypr->smtp_cc_num);
-
   if((mypr->smtp_cc_num)>0) {
 
     for(i=0;i<(mypr->smtp_cc_num);i++) {
