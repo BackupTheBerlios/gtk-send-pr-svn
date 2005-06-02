@@ -664,7 +664,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
   current = my_options->head;
 
   /* Traverse linked list and load each file */
-  while(current->filename != NULL) {
+  while (current->filename != NULL) {
 
     fix_buffer = load_file(current->filename);
 
@@ -688,13 +688,13 @@ create_gtk_ui(USER_OPTIONS *my_options)
 
   /* Free the linked list */
   current = my_options->head;
-  do {
+  while (current != NULL) {
 
     old = current;
     current = current->next;
     free(old);
 
-  } while(current!=NULL);
+  };
 
   scrolled_window4 = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_set_border_width(GTK_CONTAINER(scrolled_window4), 10);
@@ -708,7 +708,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
   fix_hbuttons = gtk_hbutton_box_new();
 
   fix_button1 = gtk_button_new_from_stock(GTK_STOCK_OPEN);
-  fix_tip1=gtk_tooltips_new();
+  fix_tip1 = gtk_tooltips_new();
   gtk_tooltips_set_tip(fix_tip1,fix_button1,"Insert a file at cursor location", "");
   gtk_tooltips_enable(fix_tip1);
 
@@ -1148,7 +1148,7 @@ fill_pr(PROBLEM_REPORT *mypr)
   i = gtk_text_buffer_get_char_count(buffer);
   gtk_text_buffer_get_iter_at_offset(buffer,(GtkTextIter *)&beg_iter,0);
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
-  from = gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
+  from = gtk_text_iter_get_visible_text(&beg_iter, &end_iter);
 
   desc_buffer = malloc(2*i+16);
   memset(desc_buffer,0,2*i+16);
