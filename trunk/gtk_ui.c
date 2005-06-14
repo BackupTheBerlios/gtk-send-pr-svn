@@ -277,9 +277,18 @@ create_gtk_ui(USER_OPTIONS *my_options)
   icon32_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird32);
   icon48_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird48);
 
-  //  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird64);
+  srandom(time(NULL));
 
-  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)empirelogo);
+  if ((random() % 10) == 0) {
+
+    printf("Sith edition!\n");
+    icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)empirelogo);
+
+  } else {
+
+    icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird64);
+
+  }
 
   g_list_append(icon_list, icon16_pixbuf);
   g_list_append(icon_list, icon32_pixbuf);
@@ -1380,6 +1389,8 @@ fix_view_drag_data_received(GtkWidget          *widget,
 
 }
 
+/* {{{ gsp_smtp_auth_dialog */
+
 int
 gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 {
@@ -1438,6 +1449,10 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 
 }
 
+/* }}} */
+
+/* {{{ auth_ok_pressed */
+
 static void
 auth_ok_pressed( GtkWidget *widget, gpointer data)
 {
@@ -1453,3 +1468,5 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
   gsp_auth_done = TRUE;
 
 }
+
+/* }}} */
