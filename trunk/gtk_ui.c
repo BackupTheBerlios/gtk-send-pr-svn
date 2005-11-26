@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <mmendez@energyhq.be>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -55,16 +55,13 @@ extern char *tzname[2];
 #include "ladybird48.xpm"
 #include "ladybird64.xpm"
 
-/* Special EPIII edition... */
-#include "empire-logo.xpm"
-
 extern char global_smtp_error_msg[1024];
 
 static gint delete_event( GtkWidget *, GdkEvent *, gpointer);
 static void destroy(GtkWidget *, gpointer);
 static void quit_pressed(GtkWidget *, gpointer);
 static void about_pressed(GtkWidget *, gpointer);
-static void help_pressed(GtkWidget *, gpointer);
+static void prefs_pressed(GtkWidget *, gpointer);
 static void send_pressed(GtkWidget *, gpointer);
 static void open_pressed(GtkWidget *, gpointer);
 static void clear_fix_pressed(GtkWidget *, gpointer);
@@ -148,7 +145,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
   GtkWidget *send_align;
   GtkWidget *quit_button;
   GtkWidget *about_button;
-  GtkWidget *help_button;
+  GtkWidget *prefs_button;
   GtkWidget *h_buttons;
   GtkWidget *vbox1;
   GtkWidget *hseparator1;
@@ -277,18 +274,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
   icon32_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird32);
   icon48_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird48);
 
-  srandom(time(NULL));
-
-  if ((random() % 10) == 0) {
-
-    printf("Sith edition!\n");
-    icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)empirelogo);
-
-  } else {
-
-    icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird64);
-
-  }
+  icon64_pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)ladybird64);
 
   g_list_append(icon_list, icon16_pixbuf);
   g_list_append(icon_list, icon32_pixbuf);
@@ -313,23 +299,25 @@ create_gtk_ui(USER_OPTIONS *my_options)
 
   quit_button = gtk_button_new_from_stock(GTK_STOCK_QUIT);
 
-  about_button = gtk_button_new();
+  //  about_button = gtk_button_new();
 
-#if GTK_CHECK_VERSION(2,6,0)
-  about_icon = gtk_image_new_from_stock(GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
-#else
-  about_icon = gtk_image_new_from_stock(GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
-#endif
+  about_button = gtk_button_new_from_stock(GTK_STOCK_ABOUT);
 
-  about_label = gtk_label_new_with_mnemonic("_About");
-  about_hbox = gtk_hbox_new(FALSE, 2);
-  about_align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
-  gtk_box_pack_start(GTK_BOX(about_hbox), about_icon, FALSE, FALSE, 0);
-  gtk_box_pack_end(GTK_BOX(about_hbox), about_label, FALSE, FALSE, 0);
-  gtk_container_add(GTK_CONTAINER(about_button), about_align);
-  gtk_container_add(GTK_CONTAINER(about_align), about_hbox);
+/* #if GTK_CHECK_VERSION(2,6,0) */
+/*   about_icon = gtk_image_new_from_stock(GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU); */
+/* #else */
+/*   about_icon = gtk_image_new_from_stock(GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU); */
+/* #endif */
 
-  help_button = gtk_button_new_from_stock(GTK_STOCK_HELP);
+/*   about_label = gtk_label_new_with_mnemonic("_About"); */
+/*   about_hbox = gtk_hbox_new(FALSE, 2); */
+/*   about_align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0); */
+/*   gtk_box_pack_start(GTK_BOX(about_hbox), about_icon, FALSE, FALSE, 0); */
+/*   gtk_box_pack_end(GTK_BOX(about_hbox), about_label, FALSE, FALSE, 0); */
+/*   gtk_container_add(GTK_CONTAINER(about_button), about_align); */
+/*   gtk_container_add(GTK_CONTAINER(about_align), about_hbox); */
+
+  prefs_button = gtk_button_new_from_stock(GTK_STOCK_PREFERENCES);
 
   /* Button tooltips */
   send_tip = gtk_tooltips_new();
@@ -337,7 +325,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
   gtk_tooltips_enable(send_tip);
 
   help_tip = gtk_tooltips_new();
-  gtk_tooltips_set_tip(help_tip,help_button, "Show online help", "");
+  gtk_tooltips_set_tip(help_tip,prefs_button, "Configure this program", "");
   gtk_tooltips_enable(help_tip);
 
   about_tip = gtk_tooltips_new();
@@ -352,7 +340,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
 
   gtk_box_pack_start(GTK_BOX(h_buttons), send_button, FALSE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(h_buttons), about_button, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(h_buttons), help_button, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(h_buttons), prefs_button, FALSE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(h_buttons), quit_button, FALSE, FALSE, 0);
 
   g_signal_connect(GTK_OBJECT(window), "delete_event",
@@ -370,8 +358,8 @@ create_gtk_ui(USER_OPTIONS *my_options)
   g_signal_connect(GTK_OBJECT(send_button), "clicked",
 		   G_CALLBACK(send_pressed), NULL);
 
-  g_signal_connect(GTK_OBJECT(help_button), "clicked",
-		   G_CALLBACK(help_pressed), NULL);				
+  g_signal_connect(GTK_OBJECT(prefs_button), "clicked",
+		   G_CALLBACK(prefs_pressed), NULL);				
 
   vbox1 = gtk_vbox_new(FALSE, 2);
   hseparator1 = gtk_hseparator_new ();
@@ -876,7 +864,7 @@ about_pressed( GtkWidget *widget, gpointer data)
     "A user friendly GNATS client";
 
   const gchar *license =
-    "Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>\n"
+    "Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.be>\n"
     "\n"
     "Redistribution and use in source and binary forms, with or without\n"
     "modification, are permitted provided that the following conditions are met:\n"
@@ -922,7 +910,7 @@ about_pressed( GtkWidget *widget, gpointer data)
 				  GSP_VERSION " "
 				  GSP_CODENAME
 				  "\nCopyright (c) 2003-2005, "
-				  "Miguel Mendez\nE-Mail: <flynn@energyhq.es.eu.org>\n"
+				  "Miguel Mendez\nE-Mail: <flynn@energyhq.be>\n"
 				  "http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
   gtk_dialog_run(GTK_DIALOG(dialog));
   gtk_widget_destroy(dialog);
@@ -931,7 +919,7 @@ about_pressed( GtkWidget *widget, gpointer data)
 }
 
 static void
-help_pressed( GtkWidget *widget, gpointer data)
+prefs_pressed( GtkWidget *widget, gpointer data)
 {
 
   GtkWidget *dialog;
