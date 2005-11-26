@@ -513,22 +513,16 @@ create_gtk_ui(USER_OPTIONS *my_options)
 
   }
 
-  if (my_options->maint_mode == MAINT_YES) {
 
-    for (i = 0; i < my_pr_defs->cat_num; i++) {
+  /* Default to the ports category */
+  for (i = 0; i < my_pr_defs->cat_num; i++) {
 
-      if (strncmp(my_pr_defs->pr_categories[i], MAINT_CAT, 255) == 0 ) {
+    if (strncmp(my_pr_defs->pr_categories[i], MAINT_CAT, 255) == 0 ) {
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), i);
-	break;
-
-      }
+      gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), i);
+      break;
 
     }
-
-  } else {
-
-    gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo3), 0);
 
   }
 
