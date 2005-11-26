@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.es.eu.org>
+  Copyright (c) 2003, 2004, 2005 Miguel Mendez <mmendez@energyhq.be>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:

@@ -851,7 +851,7 @@ about_pressed( GtkWidget *widget, gpointer data)
 #if GTK_CHECK_VERSION(2,6,0)
 
   const gchar *authors[] = {
-    "Miguel Mendez <flynn@energyhq.es.eu.org>",
+    "Miguel Mendez <mmendez@energyhq.be>",
     NULL
   };
 
