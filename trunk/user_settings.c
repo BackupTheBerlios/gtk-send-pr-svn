@@ -48,15 +48,16 @@ save_settings(USER_PROFILE *my_profile)
 {
 
   char *homedir;
-  char temp[1024];
+  char temp[FILENAME_MAX + 1];
 	
-  char temp_name[1024];
-  char temp_email[1024];
-  char temp_org[1024];
-  char temp_smtp[1024];
-  char temp_geometry[1024];
-  char temp_smtp_port[1024];
-  char temp_ssl_mode[1024];
+  char temp_name[FILENAME_MAX + 1];
+  char temp_email[FILENAME_MAX + 1];
+  char temp_org[FILENAME_MAX + 1];
+  char temp_smtp[FILENAME_MAX + 1];
+  char temp_geometry[FILENAME_MAX + 1];
+  char temp_smtp_port[FILENAME_MAX + 1];
+  char temp_ssl_mode[FILENAME_MAX + 1];
+  char temp_maint_prefix[FILENAME_MAX + 1];
 
   int i,j;
   FILE *f;
@@ -65,12 +66,12 @@ save_settings(USER_PROFILE *my_profile)
 	
   homedir = getenv("HOME");
   if(homedir == NULL) return;
-  snprintf(temp, 1024, "%s/%s", homedir, ".gtk-send-pr");
+  snprintf(temp, FILENAME_MAX, "%s/%s", homedir, ".gtk-send-pr");
 	
   i = stat(temp, &sb);
   if (i == -1) {
 	
-    j = mkdir(temp,0700);
+    j = mkdir(temp, 0700);
 	
   } else if ((sb.st_mode & S_IFDIR) != S_IFDIR){
 	
@@ -86,13 +87,13 @@ save_settings(USER_PROFILE *my_profile)
 	
   }
 	
-  snprintf(temp_name, 1024, "%s/name", temp);
-  snprintf(temp_email, 1024, "%s/email", temp);
-  snprintf(temp_org,1024, "%s/organization", temp);
-  snprintf(temp_smtp,1024, "%s/smtp", temp);
-  snprintf(temp_geometry, 1024, "%s/geometry", temp);
-  snprintf(temp_smtp_port, 1024, "%s/smtp_port", temp);
-  snprintf(temp_ssl_mode, 1024, "%s/ssl_mode", temp);
+  snprintf(temp_name, FILENAME_MAX, "%s/name", temp);
+  snprintf(temp_email, FILENAME_MAX, "%s/email", temp);
+  snprintf(temp_org, FILENAME_MAX, "%s/organization", temp);
+  snprintf(temp_smtp, FILENAME_MAX, "%s/smtp", temp);
+  snprintf(temp_geometry, FILENAME_MAX, "%s/geometry", temp);
+  snprintf(temp_smtp_port, FILENAME_MAX, "%s/smtp_port", temp);
+  snprintf(temp_ssl_mode, FILENAME_MAX, "%s/ssl_mode", temp);
 
   if(strncmp(my_profile->name, old_profile.name,
 	     (sizeof(((USER_PROFILE *) 0)->name)))!=0 || migration==1) {
@@ -175,14 +176,14 @@ load_settings(USER_PROFILE *my_profile)
   int i;
   struct passwd *pr_user;
   char *homedir;
-  char temp[1024];
-  char temp_name[1024];
-  char temp_email[1024];
-  char temp_org[1024];
-  char temp_smtp[1024];
-  char temp_smtp_port[1024];
-  char temp_ssl_mode[1024];
-  char temp_geometry[1024];
+  char temp[FILENAME_MAX + 1];
+  char temp_name[FILENAME_MAX + 1];
+  char temp_email[FILENAME_MAX + 1];
+  char temp_org[FILENAME_MAX + 1];
+  char temp_smtp[FILENAME_MAX + 1];
+  char temp_smtp_port[FILENAME_MAX + 1];
+  char temp_ssl_mode[FILENAME_MAX + 1];
+  char temp_geometry[FILENAME_MAX + 1];
   int fd;
   FILE *f;
   struct stat sb;
@@ -191,11 +192,11 @@ load_settings(USER_PROFILE *my_profile)
   homedir = getenv("HOME");
   assert(homedir != NULL);
 
-  snprintf(temp,1024, "%s/%s", homedir, ".gtk-send-pr");
+  snprintf(temp, FILENAME_MAX, "%s/%s", homedir, ".gtk-send-pr");
   i = stat(temp, &sb);
   if (i == -1) {	
 
-    snprintf(temp, 1024, "%s/%s", homedir, ".gtk-send-pr-rc");
+    snprintf(temp, FILENAME_MAX, "%s/%s", homedir, ".gtk-send-pr-rc");
     fd = open(temp, O_RDONLY, 0);
     if (fd != -1) {
 
@@ -222,13 +223,13 @@ load_settings(USER_PROFILE *my_profile)
 
   } else {
 
-    snprintf(temp_name,1024, "%s/name", temp);
-    snprintf(temp_email,1024,"%s/email", temp);
-    snprintf(temp_org,1024, "%s/organization", temp);
-    snprintf(temp_smtp,1024, "%s/smtp", temp);
-    snprintf(temp_smtp_port, 1024, "%s/smtp_port", temp);
-    snprintf(temp_ssl_mode, 1024, "%s/ssl_mode", temp);
-    snprintf(temp_geometry,1024, "%s/geometry", temp);
+    snprintf(temp_name, FILENAME_MAX, "%s/name", temp);
+    snprintf(temp_email, FILENAME_MAX,"%s/email", temp);
+    snprintf(temp_org, FILENAME_MAX, "%s/organization", temp);
+    snprintf(temp_smtp, FILENAME_MAX, "%s/smtp", temp);
+    snprintf(temp_smtp_port, FILENAME_MAX, "%s/smtp_port", temp);
+    snprintf(temp_ssl_mode, FILENAME_MAX, "%s/ssl_mode", temp);
+    snprintf(temp_geometry, FILENAME_MAX, "%s/geometry", temp);
 
     fd = open(temp_name, O_RDONLY, 0);
     if (fd != -1) {
