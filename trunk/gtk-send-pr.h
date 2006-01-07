@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003, 2004, 2005 Miguel Mendez <mmendez@energyhq.be>
+  Copyright (c) 2003 - 2006 Miguel Mendez <mmendez@energyhq.be>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -28,8 +28,8 @@
 #ifndef _GTK_SEND_PR_H_
 #define _GTK_SEND_PR_H_
 
-#define GSP_VERSION "0.5"
-#define GSP_CODENAME "\"Hung Up\""
+#define GSP_VERSION "0.4.7"
+#define GSP_CODENAME "\"Unleash the Fury\""
 
 #define GSP_SSL_NO 0
 #define GSP_SSL_EN 1
