@@ -114,7 +114,7 @@ static void
 about(void)
 {
   printf("gtk-send-pr " GSP_VERSION " " GSP_CODENAME "\n"
-	 "Copyright (c) 2003 - 2006 Miguel Mendez <flynn@energyhq.be>."
+	 "Copyright (c) 2003 - 2006 Miguel Mendez <mmendez@energyhq.be>."
 	 " All rights reserved.\n");
   exit(EXIT_SUCCESS);
 }

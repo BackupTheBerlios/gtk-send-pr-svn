@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003, 2004, 2005 Miguel Mendez <mmendez@energyhq.be>
+  Copyright (c) 2003 - 2006 Miguel Mendez <mmendez@energyhq.be>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -71,6 +71,7 @@ static void update_profile(void);
 static void fix_view_drag_data_received(GtkWidget *, GdkDragContext *, 
 					gint, gint, GtkSelectionData *, 
 					guint, guint);
+static int  do_sanity_checks(void);
 
 static int dirty;
 static GtkWidget *window;
@@ -135,10 +136,10 @@ int
 create_gtk_ui(USER_OPTIONS *my_options)
 {
 
-  GtkWidget *about_icon;
-  GtkWidget *about_label;
-  GtkWidget *about_hbox;
-  GtkWidget *about_align;
+/*   GtkWidget *about_icon; */
+/*   GtkWidget *about_label; */
+/*   GtkWidget *about_hbox; */
+/*   GtkWidget *about_align; */
   GtkWidget *send_icon;
   GtkWidget *send_label;
   GtkWidget *send_hbox;
@@ -318,6 +319,7 @@ create_gtk_ui(USER_OPTIONS *my_options)
 /*   gtk_container_add(GTK_CONTAINER(about_align), about_hbox); */
 
   prefs_button = gtk_button_new_from_stock(GTK_STOCK_PREFERENCES);
+  gtk_widget_set_sensitive(prefs_button, FALSE);
 
   /* Button tooltips */
   send_tip = gtk_tooltips_new();
@@ -858,7 +860,7 @@ about_pressed( GtkWidget *widget, gpointer data)
     "A user friendly GNATS client";
 
   const gchar *license =
-    "Copyright (c) 2003, 2004, 2005 Miguel Mendez <flynn@energyhq.be>\n"
+    "Copyright (c) 2003 - 2006 Miguel Mendez <mmendez@energyhq.be>\n"
     "\n"
     "Redistribution and use in source and binary forms, with or without\n"
     "modification, are permitted provided that the following conditions are met:\n"
@@ -883,13 +885,13 @@ about_pressed( GtkWidget *widget, gpointer data)
   gtk_show_about_dialog(GTK_WINDOW(window),
 			"authors", authors,
 			"artists", artists,
-			"copyright", "(C) 2003, 2004, 2005 Miguel Mendez",
+			"copyright", "(C) 2003 - 2006 Miguel Mendez",
 			"comments", comments,
 			"license", license,
 			"logo", icon64_pixbuf,
 			"name", "gtk-send-pr",
 			"version", GSP_VERSION,
-			"website", "http://www.energyhq.es.eu.org/gtk-send-pr.html",
+			"website", "http://gtk-send-pr.berlios.de/index.html",
 			NULL);
 
 #else
@@ -903,9 +905,9 @@ about_pressed( GtkWidget *widget, gpointer data)
 				  "gtk-send-pr "
 				  GSP_VERSION " "
 				  GSP_CODENAME
-				  "\nCopyright (c) 2003-2005, "
-				  "Miguel Mendez\nE-Mail: <flynn@energyhq.be>\n"
-				  "http://www.energyhq.es.eu.org/gtk-send-pr.html\n");
+				  "\nCopyright (c) 2003 - 2006, "
+				  "Miguel Mendez\nE-Mail: <mmendez@energyhq.be>\n"
+				  "http://gtk-send-pr.berlios.de/index.html\n");
   gtk_dialog_run(GTK_DIALOG(dialog));
   gtk_widget_destroy(dialog);
 
@@ -937,13 +939,15 @@ send_pressed( GtkWidget *widget, gpointer data)
 
   PROBLEM_REPORT mypr;
 
+  retcode = do_sanity_checks();
+  if ( retcode == -1) return;
 
   fill_pr(&mypr);
   retcode = send_pr(&mypr);
 
   if (retcode == 0) {
 
-    dirty=0;
+    dirty = 0;
     gtk_widget_set_sensitive(send_button, FALSE);
     dialog = gtk_message_dialog_new(GTK_WINDOW(window),
 				    GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -1371,8 +1375,6 @@ fix_view_drag_data_received(GtkWidget          *widget,
 
 }
 
-/* {{{ gsp_smtp_auth_dialog */
-
 int
 gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 {
@@ -1431,9 +1433,6 @@ gsp_smtp_auth_dialog(GSP_AUTH *my_auth)
 
 }
 
-/* }}} */
-
-/* {{{ auth_ok_pressed */
 
 static void
 auth_ok_pressed( GtkWidget *widget, gpointer data)
@@ -1451,4 +1450,36 @@ auth_ok_pressed( GtkWidget *widget, gpointer data)
 
 }
 
-/* }}} */
+/*
+ * Do some sanity checks before sending data.
+ * Returns 0 if everything is A-OK, -1 if
+ * something is wrong and launches a dialog
+ * warning the user.
+ */
+static int
+do_sanity_checks(void)
+{
+  int retval = 0;
+  GtkWidget *dialog;
+  char *synopsis;
+
+  /* Make sure the Synopsis field was filled */
+  synopsis = (char *)gtk_entry_get_text(GTK_ENTRY(type_entry1));
+  if (strlen(synopsis) < 1 ) {
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+					GTK_DIALOG_DESTROY_WITH_PARENT,
+					GTK_MESSAGE_ERROR,
+					GTK_BUTTONS_OK,
+					"Error: Synopsis cannot be empty.");
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);	
+
+	retval = -1;
+
+      }
+
+  return retval;
+
+
+}
