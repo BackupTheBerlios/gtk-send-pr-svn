@@ -51,6 +51,7 @@
 		customDataFormattersEnabled = 1;
 		debuggerPlugin = GDBDebugging;
 		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
 		enableDebugStr = 1;
 		environmentEntries = (
 		);
@@ -69,6 +70,7 @@
 		isSCMEnabled = 1;
 		isa = PBXSourceControlManager;
 		scmConfiguration = {
+			SubversionToolPath = /sw/bin/svn;
 		};
 		scmType = scm.subversion;
 	};
