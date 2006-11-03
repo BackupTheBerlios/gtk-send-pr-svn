@@ -1114,7 +1114,7 @@ fill_pr(PROBLEM_REPORT *mypr)
   gtk_text_buffer_get_end_iter(buffer, (GtkTextIter *)&end_iter);
   from = gtk_text_iter_get_visible_text(&beg_iter,&end_iter);
 
-  env_buffer = malloc(2*i+16);
+  env_buffer = malloc(2 * i+16);
   memset(env_buffer,0,2*i+16);
   ctmp = env_buffer;
 
