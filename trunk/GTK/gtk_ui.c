@@ -42,18 +42,18 @@ extern char *tzname[2];
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "gtk-send-pr.h"
+#include "../common/gtk-send-pr.h"
 #include "gtk_ui.h"
-#include "smtp.h"
-#include "pr_defs.h"
-#include "user_settings.h"
-#include "file.h"
-#include "uname_gather.h"
+#include "../BSD/smtp.h"
+#include "../common/pr_defs.h"
+#include "../common/user_settings.h"
+#include "../common/file.h"
+#include "../common/uname_gather.h"
 
-#include "ladybird16.xpm"
-#include "ladybird32.xpm"
-#include "ladybird48.xpm"
-#include "ladybird64.xpm"
+#include "../icon/ladybird16.xpm"
+#include "../icon/ladybird32.xpm"
+#include "../icon/ladybird48.xpm"
+#include "../icon/ladybird64.xpm"
 
 extern char global_smtp_error_msg[1024];
 

@@ -33,9 +33,9 @@
 
 #include <gtk/gtk.h>
 
-#include "gtk-send-pr.h"
+#include "../common/gtk-send-pr.h"
 #include "gtk_ui.h"
-#include "pr_defs.h"
+#include "../common/pr_defs.h"
 
 static void usage(void);
 static void about(void);

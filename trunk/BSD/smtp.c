@@ -42,8 +42,8 @@ extern char *tzname[2];
 #include <auth-client.h>
 #include <libesmtp.h>
 
-#include "gtk-send-pr.h"
-#include "gtk_ui.h"
+#include "../common/gtk-send-pr.h"
+#include "../GTK/gtk_ui.h"
 #include "smtp.h"
 
 #ifndef TRUE
