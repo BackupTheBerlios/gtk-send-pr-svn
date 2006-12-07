@@ -36,7 +36,7 @@
 static char *pr_categories[]= { "advocacy", "alpha", "amd64", "bin", "conf",
 				"docs", "gnu", "i386", "ia64", "java", "kern",
 				"misc", "ports", "powerpc", "sparc64", "standards",
-				"threads", "usb", "www"
+				"sun4v", "threads", "usb", "www"
 };
 
 static char *pr_severities[]= { "non-critical", "serious", "critical" };
