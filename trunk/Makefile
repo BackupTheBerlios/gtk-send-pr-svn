@@ -19,7 +19,7 @@ all:	$(OBJECTS)
 
 install:
 	${BSD_INSTALL_PROGRAM} gtk-send-pr ${PREFIX}/bin
-	${BSD_INSTALL_MAN} gtk-send-pr.1 ${PREFIX}/man/man1
+	${BSD_INSTALL_MAN} common/gtk-send-pr.1 ${PREFIX}/man/man1
 
 clean:
 	rm -f *.o */*.c~ */*.h~ gtk-send-pr gtk-send-pr.core
