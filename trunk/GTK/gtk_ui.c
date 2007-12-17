@@ -243,6 +243,8 @@ create_gtk_ui(USER_OPTIONS *my_options)
 
   static guint n_targets = sizeof(target_table) / sizeof(target_table[0]);
 
+  g_set_application_name("gtk-send-pr");
+
   open_menu_up = 0;
   gsp_auth_done = FALSE;
 
@@ -882,14 +884,16 @@ about_pressed( GtkWidget *widget, gpointer data)
     "OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
     "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n";
 
+  const gchar *name = "gtk-send-pr";
+
   gtk_show_about_dialog(GTK_WINDOW(window),
 			"authors", authors,
 			"artists", artists,
-			"copyright", "(C) 2003 - 2006 Miguel Mendez",
+			"copyright", "(C) 2003 - 2007 Miguel Mendez",
 			"comments", comments,
 			"license", license,
 			"logo", icon64_pixbuf,
-			"name", "gtk-send-pr",
+			//"name", name,
 			"version", GSP_VERSION,
 			"website", "http://gtk-send-pr.berlios.de/index.html",
 			NULL);
