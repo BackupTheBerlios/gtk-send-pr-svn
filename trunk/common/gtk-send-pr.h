@@ -28,8 +28,8 @@
 #ifndef _GTK_SEND_PR_H_
 #define _GTK_SEND_PR_H_
 
-#define GSP_VERSION "0.4.8"
-#define GSP_CODENAME "\"Transition to multiplatform\""
+#define GSP_VERSION "0.4.9"
+#define GSP_CODENAME "\"Back in business.\""
 
 #define GSP_SSL_NO 0
 #define GSP_SSL_EN 1
